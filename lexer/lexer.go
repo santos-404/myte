@@ -30,10 +30,23 @@ func (l *Lexer) NextToken() token.Token {
 	l.skipWhitespace()
 
 	switch l.char {
+		// Think about the first two and how to join em
 		case '=':
 			tok = newToken(token.ASSIGN, l.char)
+		case '!':
+			tok = newToken(token.EXCLAMATION, l.char)
 		case '+':
 			tok = newToken(token.PLUS, l.char)
+		case '-':
+			tok = newToken(token.MINUS, l.char)
+		case '*':
+			tok = newToken(token.ASTERISK, l.char)
+		case '/':
+			tok = newToken(token.SLASH, l.char)
+		case '<':
+			tok = newToken(token.LT, l.char)
+		case '>':
+			tok = newToken(token.GT, l.char)
 		case ',':
 			tok = newToken(token.COMMA, l.char)
 		case ';':

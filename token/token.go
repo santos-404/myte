@@ -13,7 +13,7 @@ const (
 	ASSIGN   	= "="
 	PLUS     	= "+"
 	MINUS    	= "-"
-	BANG     	= "!"
+	EXCLAMATION = "!"
 	ASTERISK 	= "*"
 	SLASH    	= "/"
 
@@ -39,6 +39,7 @@ const (
 	IF       	= "IF"
 	ELSE     	= "ELSE"
 	RETURN   	= "RETURN"
+	FOR 		= "FOR"
 )
 
 type Token struct {
@@ -51,6 +52,12 @@ var keywords = map[string]TokenType {
 	"fn": FUNCTION,
 	"const": CONST,
 	"var": VAR,
+	"true": TRUE,
+	"false": FALSE,
+	"if": IF,
+	"else": ELSE,
+	"return": RETURN,
+	"for": FOR,
 }
 
 func LookupIdent(ident string) TokenType {

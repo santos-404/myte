@@ -6,13 +6,16 @@ import (
 	"github.com/santos-404/myte/token"
 )
 
-func TestNextToken(t *testing.T) {
+func TestNextTokenLarge(t *testing.T) {
 	// I cannot be sure now if this will be the final syntax of the lang. 
 	input := `const five = 5;
 const ten = 10;
 
-const add = fn(x, y) {
-	x + y;
+const addIfEqual = fn(x, y) {
+	if x == y {
+		return x + y;
+	}
+	return 0;
 }
 
 const result = add(five, ten);
@@ -36,7 +39,7 @@ const result = add(five, ten);
 		{token.SEMICOLON, ";"},
 	
 		{token.CONST, "const"},
-		{token.IDENT, "add"},
+		{token.IDENT, "addIfEqual"},
 		{token.ASSIGN, "="},
 		{token.FUNCTION, "fn"},
 		{token.LPAREN, "("},
@@ -45,9 +48,19 @@ const result = add(five, ten);
 		{token.IDENT, "y"},
 		{token.RPAREN, ")"},
 		{token.LBRACE, "{"},
+		{token.IF, "if"},
+		{token.IDENT, "x"},
+		{token.EQ, "=="},
+		{token.IDENT, "y"},
+		{token.LBRACE, "{"},
+		{token.RETURN, "return"},
 		{token.IDENT, "x"},
 		{token.PLUS, "+"},
 		{token.IDENT, "y"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
+		{token.RETURN, "return"},
+		{token.INT, "0"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
 
@@ -75,6 +88,46 @@ const result = add(five, ten);
 
 		if tok.Literal!= tt.expectedLiteral{
 			t.Fatalf("tests[%d] - literal wrong. expected %q, got =%q)",
+				i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}
+
+func TestBangOperators(t *testing.T) {
+	input := `
+	if x != y {
+		return !false;
+	}
+	`
+
+	tests := []struct {
+		expectedType    token.TokenType
+		expectedLiteral string
+	}{
+		{token.IF, "if"},
+		{token.IDENT, "x"},
+		{token.NOT_EQ, "!="},
+		{token.IDENT, "y"},
+		{token.LBRACE, "{"},
+		{token.RETURN, "return"},
+		{token.BANG, "!"},
+		{token.IDENT, "false"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+
+		if tok.Type != tt.expectedType {
+			t.Fatalf("TestBangOperators[%d] - token type wrong. expected=%q, got=%q",
+				i, tt.expectedType, tok.Type)
+		}
+
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("TestBangOperators[%d] - literal wrong. expected=%q, got=%q",
 				i, tt.expectedLiteral, tok.Literal)
 		}
 	}

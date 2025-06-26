@@ -49,7 +49,7 @@ func (l *Lexer) NextToken() token.Token {
 				tok.Type = token.NOT_EQ
 				tok.Literal = literal
 			} else {
-				tok = newToken(token.EXCLAMATION, l.char)
+				tok = newToken(token.BANG, l.char)
 			}
 		case '+':
 			tok = newToken(token.PLUS, l.char)

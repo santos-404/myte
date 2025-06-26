@@ -111,7 +111,7 @@ func TestBangOperators(t *testing.T) {
 		{token.LBRACE, "{"},
 		{token.RETURN, "return"},
 		{token.BANG, "!"},
-		{token.IDENT, "false"},
+		{token.FALSE, "false"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
 	}
@@ -128,6 +128,62 @@ func TestBangOperators(t *testing.T) {
 
 		if tok.Literal != tt.expectedLiteral {
 			t.Fatalf("TestBangOperators[%d] - literal wrong. expected=%q, got=%q",
+				i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}
+
+func TestComparisonOperators(t *testing.T) {
+	input := `
+	if 5 < 10 {
+		return 10 > 5;
+	}
+	if 1 == 1 {
+		return 1 != 2;
+	}
+	`
+
+	tests := []struct {
+		expectedType    token.TokenType
+		expectedLiteral string
+	}{
+		{token.IF, "if"},
+		{token.INT, "5"},
+		{token.LT, "<"},
+		{token.INT, "10"},
+		{token.LBRACE, "{"},
+		{token.RETURN, "return"},
+		{token.INT, "10"},
+		{token.GT, ">"},
+		{token.INT, "5"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
+
+		{token.IF, "if"},
+		{token.INT, "1"},
+		{token.EQ, "=="},
+		{token.INT, "1"},
+		{token.LBRACE, "{"},
+		{token.RETURN, "return"},
+		{token.INT, "1"},
+		{token.NOT_EQ, "!="},
+		{token.INT, "2"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+
+		if tok.Type != tt.expectedType {
+			t.Fatalf("TestComparisonOperators[%d] - token type wrong. expected=%q, got=%q",
+				i, tt.expectedType, tok.Type)
+		}
+
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("TestComparisonOperators[%d] - literal wrong. expected=%q, got=%q",
 				i, tt.expectedLiteral, tok.Literal)
 		}
 	}

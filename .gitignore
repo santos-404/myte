@@ -1,0 +1,33 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Build and IDE folders
+bin/
+build/
+dist/
+
+# Go modules
+vendor/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# Logs
+*.log
+
+# Ref code
+ref_code/
+

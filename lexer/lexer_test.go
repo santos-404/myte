@@ -106,7 +106,7 @@ func TestBangOperators(t *testing.T) {
 	}{
 		{token.IF, "if"},
 		{token.IDENT, "x"},
-		{token.NOT_EQ, "!="},
+		{token.NOTEQ, "!="},
 		{token.IDENT, "y"},
 		{token.LBRACE, "{"},
 		{token.RETURN, "return"},
@@ -166,7 +166,7 @@ func TestComparisonOperators(t *testing.T) {
 		{token.LBRACE, "{"},
 		{token.RETURN, "return"},
 		{token.INT, "1"},
-		{token.NOT_EQ, "!="},
+		{token.NOTEQ, "!="},
 		{token.INT, "2"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},

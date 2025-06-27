@@ -9,22 +9,38 @@ const (
 	
 	IDENT 		= "IDENT"
 	INT 		= "INT"
+	FLOAT 		= "FLOAT"
+	STRING 		= "STRING"
 
 	ASSIGN   	= "="
 	PLUS     	= "+"
+	DOUBLEPLUS  = "++"
+	PLUSEQUAL 	= "+="
 	MINUS    	= "-"
+	DOUBLEMINUS = "--"
+	MINUSEQUAL  = "-="
 	BANG 		= "!"
-	ASTERISK 	= "*"
+	STAR 		= "*"
+	DOUBLESTAR  = "**"
+	STAREQUAL 	= "*="
 	SLASH    	= "/"
+	DOUBLESLASH	= "//"
+	SLASHEQUAL	= "/="
+	PERCENT 	= "%"	
+
+	AND 		= "&&"
+	OR 			= "||"
 
 	LT 			= "<"
+	LTEQUAL 	= "<="
 	GT 			= ">"
-
+	GTEQUAL 	= ">="
 	EQ     		= "=="
-	NOT_EQ 		= "!="
+	NOTEQ 		= "!="
 
 	COMMA 		= ","
 	SEMICOLON 	= ";"
+	COLON 		= ":"
 
 	LPAREN 		= "("
 	RPAREN 		= ")"
@@ -40,6 +56,10 @@ const (
 	ELSE     	= "ELSE"
 	RETURN   	= "RETURN"
 	FOR 		= "FOR"
+	BREAK 		= "BREAK"
+	CONTINUE  	= "CONTINUE"
+	NIL 		= "NIL"
+	IMPORT 		= "IMPORT"  // Not sure if I will use this.
 )
 
 type Token struct {
@@ -58,6 +78,10 @@ var keywords = map[string]TokenType {
 	"else": ELSE,
 	"return": RETURN,
 	"for": FOR,
+	"break": BREAK,
+	"continue": CONTINUE,
+	"nil": NIL,
+	"import": IMPORT,
 }
 
 func LookupIdent(ident string) TokenType {

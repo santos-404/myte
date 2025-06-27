@@ -30,43 +30,82 @@ func (l *Lexer) NextToken() token.Token {
 	l.skipWhitespace()
 
 	switch l.char {
-		// Think about the first two and how to join em
 		case '=':
 			if l.peekNextChar() == '=' {
-				char := l.char
-				l.readChar()
-				literal := string(char) + string(l.char)
-				tok.Type = token.EQ
-				tok.Literal = literal
+				tok = l.newComplexToken(token.EQ)
 			} else {
 				tok = newToken(token.ASSIGN, l.char)
 			}
 		case '!':
 			if l.peekNextChar() == '=' {
-				char := l.char
-				l.readChar()
-				literal := string(char) + string(l.char)
-				tok.Type = token.NOT_EQ
-				tok.Literal = literal
+				tok = l.newComplexToken(token.NOTEQ)
 			} else {
 				tok = newToken(token.BANG, l.char)
 			}
 		case '+':
-			tok = newToken(token.PLUS, l.char)
+			if l.peekNextChar() == '=' {
+				tok = l.newComplexToken(token.PLUSEQUAL)
+			} else if l.peekNextChar() == '+'{
+				tok = l.newComplexToken(token.DOUBLEPLUS)
+			} else {
+				tok = newToken(token.PLUS, l.char)
+			}
 		case '-':
-			tok = newToken(token.MINUS, l.char)
+			if l.peekNextChar() == '=' {
+				tok = l.newComplexToken(token.MINUSEQUAL)
+			} else if l.peekNextChar() == '-'{
+				tok = l.newComplexToken(token.DOUBLEMINUS)
+			} else {
+				tok = newToken(token.MINUS, l.char)
+			}
 		case '*':
-			tok = newToken(token.ASTERISK, l.char)
+			if l.peekNextChar() == '=' {
+				tok = l.newComplexToken(token.STAREQUAL)
+			} else if l.peekNextChar() == '*'{
+				tok = l.newComplexToken(token.DOUBLESTAR)
+			} else {
+				tok = newToken(token.STAR, l.char)
+			}
 		case '/':
-			tok = newToken(token.SLASH, l.char)
+			if l.peekNextChar() == '=' {
+				tok = l.newComplexToken(token.SLASHEQUAL)
+			} else if l.peekNextChar() == '/'{
+				tok = l.newComplexToken(token.DOUBLESLASH)
+			} else {
+				tok = newToken(token.SLASH, l.char)
+			}
+		case '%':
+			tok = newToken(token.PERCENT, l.char)
+		case '&':
+			if l.peekNextChar() == '&' {
+				tok = l.newComplexToken(token.AND)
+			} else {
+				tok = newToken(token.ILLEGAL, l.char)
+			}
+		case '|':
+			if l.peekNextChar() == '|' {
+				tok = l.newComplexToken(token.OR)
+			} else {
+				tok = newToken(token.ILLEGAL, l.char)
+			}
 		case '<':
-			tok = newToken(token.LT, l.char)
+			if l.peekNextChar() == '=' {
+				tok = l.newComplexToken(token.LTEQUAL)
+			} else {
+				tok = newToken(token.LT, l.char)
+			}
 		case '>':
-			tok = newToken(token.GT, l.char)
+			if l.peekNextChar() == '=' {
+				tok = l.newComplexToken(token.GTEQUAL)
+			} else {
+				tok = newToken(token.GT, l.char)
+			}
 		case ',':
 			tok = newToken(token.COMMA, l.char)
 		case ';':
 			tok = newToken(token.SEMICOLON, l.char)
+		case ':':
+			tok = newToken(token.COLON, l.char)
 		case '(':
 			tok = newToken(token.LPAREN, l.char)
 		case ')':
@@ -145,4 +184,11 @@ func (l* Lexer) peekNextChar() byte {
 		return 0
 	}
 	return l.input[l.readPosition]
+}
+
+func (l* Lexer) newComplexToken(tokenType token.TokenType) token.Token {
+	char := l.char
+	l.readChar()
+	literal := string(char) + string(l.char)
+	return token.Token{Type: tokenType, Literal: literal }
 }

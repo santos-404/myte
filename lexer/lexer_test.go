@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/santos-404/myte/token"
@@ -235,3 +236,45 @@ const mixedQuotes = "'Hello', she said.";
 		}
 	}
 }
+
+func TestLineAndColumn(t *testing.T) {
+	input := `
+if x != y {
+	return !false;
+}
+	`
+
+	tests := []struct {
+		expectedLine int
+		expectedColumn int
+	}{
+		{1, 0},
+		{1, 3},
+		{1, 5},
+		{1, 8},
+		{1, 10},
+		{2, 4},
+		{2, 11},
+		{2, 12},
+		{2, 17},
+		{3, 0},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+
+		if tok.Line != tt.expectedLine{
+			t.Fatalf("TestLineAndColumn[%d] - token line wrong. expected=%d, got=%d",
+				i, tt.expectedLine, tok.Line)
+		}
+		fmt.Println(tt.expectedLine, tt.expectedColumn, tok)
+
+		// if tok.Column!= tt.expectedColumn{
+		// 	t.Fatalf("TestLineAndColumn[%d] - token column wrong. expected=%d, got=%d",
+		// 		i, tt.expectedColumn, tok.Column)
+		// }
+	}
+}
+

@@ -14,6 +14,8 @@ type Lexer struct {
 	position 		int  // current position on input | points to current char
 	readPosition 	int  // current reading position | after current char
 	char 			byte
+	line			int
+	column			int
 }
 
 func New(input string) *Lexer {
@@ -30,65 +32,124 @@ func (l *Lexer) NextToken() token.Token {
 	l.skipWhitespace()
 
 	switch l.char {
-		// Think about the first two and how to join em
 		case '=':
 			if l.peekNextChar() == '=' {
-				char := l.char
-				l.readChar()
-				literal := string(char) + string(l.char)
-				tok.Type = token.EQ
-				tok.Literal = literal
+				tok = l.newComplexToken(token.EQ)
 			} else {
-				tok = newToken(token.ASSIGN, l.char)
+				tok = l.newToken(token.ASSIGN, l.char)
 			}
 		case '!':
 			if l.peekNextChar() == '=' {
-				char := l.char
-				l.readChar()
-				literal := string(char) + string(l.char)
-				tok.Type = token.NOT_EQ
-				tok.Literal = literal
+				tok = l.newComplexToken(token.NOTEQ)
 			} else {
-				tok = newToken(token.BANG, l.char)
+				tok = l.newToken(token.BANG, l.char)
 			}
 		case '+':
-			tok = newToken(token.PLUS, l.char)
+			if l.peekNextChar() == '=' {
+				tok = l.newComplexToken(token.PLUSEQUAL)
+			} else if l.peekNextChar() == '+'{
+				tok = l.newComplexToken(token.DOUBLEPLUS)
+			} else {
+				tok = l.newToken(token.PLUS, l.char)
+			}
 		case '-':
-			tok = newToken(token.MINUS, l.char)
+			if l.peekNextChar() == '=' {
+				tok = l.newComplexToken(token.MINUSEQUAL)
+			} else if l.peekNextChar() == '-'{
+				tok = l.newComplexToken(token.DOUBLEMINUS)
+			} else {
+				tok = l.newToken(token.MINUS, l.char)
+			}
 		case '*':
-			tok = newToken(token.ASTERISK, l.char)
+			if l.peekNextChar() == '=' {
+				tok = l.newComplexToken(token.STAREQUAL)
+			} else if l.peekNextChar() == '*'{
+				tok = l.newComplexToken(token.DOUBLESTAR)
+			} else {
+				tok = l.newToken(token.STAR, l.char)
+			}
 		case '/':
-			tok = newToken(token.SLASH, l.char)
+			if l.peekNextChar() == '=' {
+				tok = l.newComplexToken(token.SLASHEQUAL)
+			} else if l.peekNextChar() == '/'{
+				tok = l.newComplexToken(token.DOUBLESLASH)
+			} else {
+				tok = l.newToken(token.SLASH, l.char)
+			}
+		case '%':
+			tok = l.newToken(token.PERCENT, l.char)
+		case '&':
+			if l.peekNextChar() == '&' {
+				tok = l.newComplexToken(token.AND)
+			} else {
+				tok = l.newToken(token.ILLEGAL, l.char)
+			}
+		case '|':
+			if l.peekNextChar() == '|' {
+				tok = l.newComplexToken(token.OR)
+			} else {
+				tok = l.newToken(token.ILLEGAL, l.char)
+			}
 		case '<':
-			tok = newToken(token.LT, l.char)
+			if l.peekNextChar() == '=' {
+				tok = l.newComplexToken(token.LTEQUAL)
+			} else {
+				tok = l.newToken(token.LT, l.char)
+			}
 		case '>':
-			tok = newToken(token.GT, l.char)
+			if l.peekNextChar() == '=' {
+				tok = l.newComplexToken(token.GTEQUAL)
+			} else {
+				tok = l.newToken(token.GT, l.char)
+			}
 		case ',':
-			tok = newToken(token.COMMA, l.char)
+			tok = l.newToken(token.COMMA, l.char)
 		case ';':
-			tok = newToken(token.SEMICOLON, l.char)
+			tok = l.newToken(token.SEMICOLON, l.char)
+		case ':':
+			tok = l.newToken(token.COLON, l.char)
 		case '(':
-			tok = newToken(token.LPAREN, l.char)
+			tok = l.newToken(token.LPAREN, l.char)
 		case ')':
-			tok = newToken(token.RPAREN, l.char)
+			tok = l.newToken(token.RPAREN, l.char)
 		case '{':
-			tok = newToken(token.LBRACE, l.char)
+			tok = l.newToken(token.LBRACE, l.char)
 		case '}':
-			tok = newToken(token.RBRACE, l.char)
+			tok = l.newToken(token.RBRACE, l.char)
+		case '.':
+			tok.Line = l.line
+			tok.Column = l.column
+			tok.Literal, tok.Type = l.readNumber()
+			return tok
+		case '"':
+			tok.Column = l.column  // I did it first of all to store the position of the beginning
+			tok.Line = l.line
+			tok.Literal = l.readString('"')
+			tok.Type = token.STRING
+			return tok
+		case '\'':
+			tok.Column = l.column 
+			tok.Line = l.line
+			tok.Literal = l.readString('\'')
+			tok.Type = token.STRING
+			return tok
 		case 0:
 			tok.Literal = ""
 			tok.Type = token.EOF
 		default:
 			if isLetter(l.char) {
+				tok.Column = l.column
+				tok.Line = l.line
 				tok.Literal = l.readIdentifier()
 				tok.Type = token.LookupIdent(tok.Literal)
 				return tok  // We can return because readIdentifier() makes what we need from readChar()
 			} else if isDigit(l.char) {
-				tok.Literal = l.readNumber()
-				tok.Type = token.INT
+				tok.Line = l.line
+				tok.Column = l.column
+				tok.Literal, tok.Type = l.readNumber()
 				return tok
 			} else {
-				tok = newToken(token.ILLEGAL, l.char)
+				tok = l.newToken(token.ILLEGAL, l.char)
 			}
 	}
 	l.readChar()
@@ -103,10 +164,47 @@ func (l * Lexer) readChar() {
 	}
 	l.position = l.readPosition
 	l.readPosition++
+
+	if l.char == '\n' {
+		l.line++
+		l.column = 0
+	} else if l.char == '\t'{
+		l.column += 4  // My default tab size is gonna be 4. Maybe I must update smth here.
+	} else {
+		l.column++
+	}
 }
 
-func newToken (tokenType token.TokenType, char byte) token.Token {
-	return token.Token{Type: tokenType, Literal: string(char)}
+func (l *Lexer) newToken(tokenType token.TokenType, char byte) token.Token {
+	return token.Token{
+		Type: tokenType, 
+		Literal: string(char),
+		Line: l.line,
+		Column: l.column, 
+	}
+}
+
+func (l* Lexer) newComplexToken(tokenType token.TokenType) token.Token {
+	char := l.char
+	startColumn := l.column
+	l.readChar()
+	literal := string(char) + string(l.char)
+	return token.Token{
+		Type: tokenType, 
+		Literal: literal,
+		Line: l.line,
+		Column: startColumn, 
+	}
+}
+
+func (l *Lexer) readString(quoteType byte) string {
+	startPos := l.position	
+	l.readChar()	
+	for l.char != quoteType {
+		l.readChar()	
+	}
+	l.readChar()	
+	return l.input[startPos:l.position]
 }
 
 func (l *Lexer) readIdentifier() string {
@@ -117,12 +215,25 @@ func (l *Lexer) readIdentifier() string {
 	return l.input[startPos:l.position]
 }
 
-func (l *Lexer) readNumber() string {
+func (l *Lexer) readNumber() (string, token.TokenType) {
+	/*
+	This function iterate through the number updating the lexer via readChar()
+	It returns the literal of the number and the type. It can be either an int or a float
+	*/
 	startPos := l.position
+	
 	for isDigit(l.char) {
 		l.readChar()
 	}
-	return l.input[startPos:l.position]
+	if (l.char != '.') {
+		return l.input[startPos:l.position], token.INT
+	} 
+
+	l.readChar()
+	for isDigit(l.char) {
+		l.readChar()
+	}
+	return l.input[startPos:l.position], token.FLOAT
 }
 
 // This is a impactful point for the performance of the lang. Might be improved
@@ -146,3 +257,4 @@ func (l* Lexer) peekNextChar() byte {
 	}
 	return l.input[l.readPosition]
 }
+

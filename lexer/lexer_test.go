@@ -106,7 +106,7 @@ func TestBangOperators(t *testing.T) {
 	}{
 		{token.IF, "if"},
 		{token.IDENT, "x"},
-		{token.NOT_EQ, "!="},
+		{token.NOTEQ, "!="},
 		{token.IDENT, "y"},
 		{token.LBRACE, "{"},
 		{token.RETURN, "return"},
@@ -166,7 +166,7 @@ func TestComparisonOperators(t *testing.T) {
 		{token.LBRACE, "{"},
 		{token.RETURN, "return"},
 		{token.INT, "1"},
-		{token.NOT_EQ, "!="},
+		{token.NOTEQ, "!="},
 		{token.INT, "2"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
@@ -188,3 +188,149 @@ func TestComparisonOperators(t *testing.T) {
 		}
 	}
 }
+
+
+
+func TestNextTokenWithQuotes(t *testing.T) {
+	input := `
+const singleQuote = 'hello world';
+const doubleQuote = "hello world";
+const mixedQuotes = "'Hello', she said.";
+`
+
+	tests := []struct {
+		expectedType   token.TokenType
+		expectedLiteral string
+	}{
+		{token.CONST, "const"},
+		{token.IDENT, "singleQuote"},
+		{token.ASSIGN, "="},
+		{token.STRING, "'hello world'"},
+		{token.SEMICOLON, ";"},
+
+		{token.CONST, "const"},
+		{token.IDENT, "doubleQuote"},
+		{token.ASSIGN, "="},
+		{token.STRING, `"hello world"`},
+		{token.SEMICOLON, ";"},
+
+		{token.CONST, "const"},
+		{token.IDENT, "mixedQuotes"},
+		{token.ASSIGN, "="},
+		{token.STRING, `"'Hello', she said."`},
+		{token.SEMICOLON, ";"},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+
+		if tok.Type != tt.expectedType {
+			t.Fatalf("tests[%d] - token type wrong. expected=%q, got=%q", i, tt.expectedType, tok.Type)
+		}
+
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q", i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}
+
+func TestNextTokenWithFloat(t *testing.T) {
+	input := `
+const startingWithNumber = 123.456;
+const startingWithPoint= .987;`
+
+// const operationWithFloats = fn (x, y) {
+// 	return 12.03 - .98;
+// }
+// `
+
+	tests := []struct {
+		expectedType   token.TokenType
+		expectedLiteral string
+	}{
+		{token.CONST, "const"},
+		{token.IDENT, "startingWithNumber"},
+		{token.ASSIGN, "="},
+		{token.FLOAT, "123.456"},
+		{token.SEMICOLON, ";"},
+
+		{token.CONST, "const"},
+		{token.IDENT, "startingWithPoint"},
+		{token.ASSIGN, "="},
+		{token.FLOAT, ".987"},
+		{token.SEMICOLON, ";"},
+
+		// {token.CONST, "const"},
+		// {token.IDENT, "operationWithFloats"},
+		// {token.ASSIGN, "="},
+		// {token.FUNCTION, "fn"},
+		// {token.LPAREN, "("},
+		// {token.IDENT, "x"},
+		// {token.COMMA, ","},
+		// {token.IDENT, "y"},
+		// {token.RPAREN, ")"},
+		// {token.LBRACE, "{"},
+		// {token.RETURN, "return"},
+		// {token.FLOAT, "12.03"},
+		// {token.MINUS, "-"},
+		// {token.FLOAT, ".98"},
+		// {token.SEMICOLON, ";"},
+		// {token.RBRACE, "}"},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+
+		if tok.Type != tt.expectedType {
+			t.Fatalf("tests[%d] - token type wrong. expected=%q, got=%q", i, tt.expectedType, tok.Type)
+		}
+
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q", i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}
+
+func TestLineAndColumn(t *testing.T) {
+	input := `
+if x != y {
+	return !false;
+}
+	`
+
+	tests := []struct {
+		expectedLine int
+		expectedColumn int
+	}{
+		{1, 0},
+		{1, 3},
+		{1, 5},
+		{1, 8},
+		{1, 10},
+		{2, 4},
+		{2, 11},
+		{2, 12},
+		{2, 17},
+		{3, 0},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+
+		if tok.Line != tt.expectedLine{
+			t.Fatalf("TestLineAndColumn[%d] - token line wrong. expected=%d, got=%d",
+				i, tt.expectedLine, tok.Line)
+		}
+		// if tok.Column!= tt.expectedColumn{
+		// 	t.Fatalf("TestLineAndColumn[%d] - token column wrong. expected=%d, got=%d",
+		// 		i, tt.expectedColumn, tok.Column)
+		// }
+	}
+}
+

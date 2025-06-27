@@ -1,50 +1,72 @@
 package token
 
 // Update this to an int or a byte might be a good option for the future
-type TokenType string
+type TokenType byte 
 
 const (
-	ILLEGAL 	= "ILLEGAL"
-	EOF 		= "EOF"
+	ILLEGAL TokenType = iota
+	EOF
 	
-	IDENT 		= "IDENT"
-	INT 		= "INT"
+	IDENT
+	INT
+	FLOAT
+	STRING
 
-	ASSIGN   	= "="
-	PLUS     	= "+"
-	MINUS    	= "-"
-	BANG 		= "!"
-	ASTERISK 	= "*"
-	SLASH    	= "/"
+	ASSIGN
+	PLUS
+	DOUBLEPLUS
+	PLUSEQUAL
+	MINUS
+	DOUBLEMINUS
+	MINUSEQUAL
+	BANG
+	STAR
+	DOUBLESTAR
+	STAREQUAL
+	SLASH
+	DOUBLESLASH
+	SLASHEQUAL
+	PERCENT
 
-	LT 			= "<"
-	GT 			= ">"
+	AND
+	OR
+	LT
+	LTEQUAL
+	GT
+	GTEQUAL
+	EQ
+	NOTEQ
 
-	EQ     		= "=="
-	NOT_EQ 		= "!="
+	COMMA
+	SEMICOLON
+	COLON
 
-	COMMA 		= ","
-	SEMICOLON 	= ";"
+	LPAREN
+	RPAREN
+	LBRACE
+	RBRACE
 
-	LPAREN 		= "("
-	RPAREN 		= ")"
-	LBRACE 		= "{"
-	RBRACE 		= "}"
-
-	FUNCTION 	= "FUNCTION"
-	VAR      	= "VAR"
-	CONST 		= "CONST"  // I ain't sure I will be able to use this.
-	TRUE     	= "TRUE"
-	FALSE    	= "FALSE"
-	IF       	= "IF"
-	ELSE     	= "ELSE"
-	RETURN   	= "RETURN"
-	FOR 		= "FOR"
+	FUNCTION
+	VAR
+	CONST
+	TRUE
+	FALSE
+	IF
+	ELSE
+	RETURN
+	FOR
+	BREAK
+	CONTINUE
+	NIL
+	IMPORT  // Not sure if I will use this.
 )
+
 
 type Token struct {
 	Type 	TokenType
 	Literal string
+	Line	int
+	Column	int
 }
 
 // This is useful to tell user-defined indetifiers apart from language keywords
@@ -58,6 +80,10 @@ var keywords = map[string]TokenType {
 	"else": ELSE,
 	"return": RETURN,
 	"for": FOR,
+	"break": BREAK,
+	"continue": CONTINUE,
+	"nil": NIL,
+	"import": IMPORT,
 }
 
 func LookupIdent(ident string) TokenType {
@@ -66,3 +92,65 @@ func LookupIdent(ident string) TokenType {
 	}
 	return IDENT 
 }
+
+
+// This is gonna be used to make the process of debugging easier.
+var tokenTypeStrings = [...]string{
+	"ILLEGAL",
+	"EOF",
+	"IDENT",
+	"INT",
+	"FLOAT",
+	"STRING",
+	"=",
+	"+",
+	"++",
+	"+=",
+	"-",
+	"--",
+	"-=",
+	"!",
+	"*",
+	"**",
+	"*=",
+	"/",
+	"//",
+	"/=",
+	"%",
+	"&&",
+	"||",
+	"<",
+	"<=",
+	">",
+	">=",
+	"==",
+	"!=",
+	",",
+	";",
+	":",
+	"(",
+	")",
+	"{",
+	"}",
+	"FUNCTION",
+	"VAR",
+	"CONST",
+	"TRUE",
+	"FALSE",
+	"IF",
+	"ELSE",
+	"RETURN",
+	"FOR",
+	"BREAK",
+	"CONTINUE",
+	"NIL",
+	"IMPORT",
+}
+
+func (tt TokenType) String() string {
+	if int(tt) < len(tokenTypeStrings) {
+		return tokenTypeStrings[tt]
+	}
+	return "UNKNOWN"
+}
+

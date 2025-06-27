@@ -63,13 +63,7 @@ Currently used (or planned) technologies:
 
 Everyone is welcome to contribute ideas, issues, code, or just follow along.
 
-Before contributing, please:
-
-- Be kind and respectful.
-- Understand that this is not a stable or usable product.
-- Expect changes, rewrites, and breakages.
-
-If you’d like to help, feel free to fork the repo and open a pull request!
+If you’d like to help, feel free. You can refer to [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
 
 ---
 

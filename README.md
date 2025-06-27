@@ -8,6 +8,14 @@ If you're curious about the goals and design of Myte, check out the [CONTEXT.md]
 
 ---
 
+## Contribution guidelines
+
+Everyone is welcome to contribute ideas, issues, code, or just follow along.
+
+If you’d like to help, feel free. You can refer to [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
+
+---
+
 ## License
 
 This project is licensed under the **MIT License**.  

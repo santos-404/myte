@@ -188,3 +188,50 @@ func TestComparisonOperators(t *testing.T) {
 		}
 	}
 }
+
+
+
+func TestNextTokenWithQuotes(t *testing.T) {
+	input := `
+const singleQuote = 'hello world';
+const doubleQuote = "hello world";
+const mixedQuotes = "'Hello', she said.";
+`
+
+	tests := []struct {
+		expectedType   token.TokenType
+		expectedLiteral string
+	}{
+		{token.CONST, "const"},
+		{token.IDENT, "singleQuote"},
+		{token.ASSIGN, "="},
+		{token.STRING, "'hello world'"},
+		{token.SEMICOLON, ";"},
+
+		{token.CONST, "const"},
+		{token.IDENT, "doubleQuote"},
+		{token.ASSIGN, "="},
+		{token.STRING, `"hello world"`},
+		{token.SEMICOLON, ";"},
+
+		{token.CONST, "const"},
+		{token.IDENT, "mixedQuotes"},
+		{token.ASSIGN, "="},
+		{token.STRING, `"'Hello', she said."`},
+		{token.SEMICOLON, ";"},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+
+		if tok.Type != tt.expectedType {
+			t.Fatalf("tests[%d] - token type wrong. expected=%q, got=%q", i, tt.expectedType, tok.Type)
+		}
+
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q", i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}

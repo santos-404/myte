@@ -11,5 +11,6 @@ If you're curious about the goals and design of Myte, check out the [CONTEXT.md]
 ## License
 
 This project is licensed under the **MIT License**.  
-Everyone is welcome to contribute—issues, suggestions, and pull requests are highly appreciated!
+
+Everyone is welcome to contribute; issues, suggestions, and pull requests are highly appreciated!
 

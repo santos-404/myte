@@ -1,6 +1,8 @@
 package lexer
 
 import (
+	"fmt"
+
 	"github.com/santos-404/myte/token"
 )
 
@@ -14,6 +16,8 @@ type Lexer struct {
 	position 		int  // current position on input | points to current char
 	readPosition 	int  // current reading position | after current char
 	char 			byte
+	line			int
+	column			int
 }
 
 func New(input string) *Lexer {
@@ -34,13 +38,13 @@ func (l *Lexer) NextToken() token.Token {
 			if l.peekNextChar() == '=' {
 				tok = l.newComplexToken(token.EQ)
 			} else {
-				tok = newToken(token.ASSIGN, l.char)
+				tok = l.newToken(token.ASSIGN, l.char)
 			}
 		case '!':
 			if l.peekNextChar() == '=' {
 				tok = l.newComplexToken(token.NOTEQ)
 			} else {
-				tok = newToken(token.BANG, l.char)
+				tok = l.newToken(token.BANG, l.char)
 			}
 		case '+':
 			if l.peekNextChar() == '=' {
@@ -48,7 +52,7 @@ func (l *Lexer) NextToken() token.Token {
 			} else if l.peekNextChar() == '+'{
 				tok = l.newComplexToken(token.DOUBLEPLUS)
 			} else {
-				tok = newToken(token.PLUS, l.char)
+				tok = l.newToken(token.PLUS, l.char)
 			}
 		case '-':
 			if l.peekNextChar() == '=' {
@@ -56,7 +60,7 @@ func (l *Lexer) NextToken() token.Token {
 			} else if l.peekNextChar() == '-'{
 				tok = l.newComplexToken(token.DOUBLEMINUS)
 			} else {
-				tok = newToken(token.MINUS, l.char)
+				tok = l.newToken(token.MINUS, l.char)
 			}
 		case '*':
 			if l.peekNextChar() == '=' {
@@ -64,7 +68,7 @@ func (l *Lexer) NextToken() token.Token {
 			} else if l.peekNextChar() == '*'{
 				tok = l.newComplexToken(token.DOUBLESTAR)
 			} else {
-				tok = newToken(token.STAR, l.char)
+				tok = l.newToken(token.STAR, l.char)
 			}
 		case '/':
 			if l.peekNextChar() == '=' {
@@ -72,53 +76,57 @@ func (l *Lexer) NextToken() token.Token {
 			} else if l.peekNextChar() == '/'{
 				tok = l.newComplexToken(token.DOUBLESLASH)
 			} else {
-				tok = newToken(token.SLASH, l.char)
+				tok = l.newToken(token.SLASH, l.char)
 			}
 		case '%':
-			tok = newToken(token.PERCENT, l.char)
+			tok = l.newToken(token.PERCENT, l.char)
 		case '&':
 			if l.peekNextChar() == '&' {
 				tok = l.newComplexToken(token.AND)
 			} else {
-				tok = newToken(token.ILLEGAL, l.char)
+				tok = l.newToken(token.ILLEGAL, l.char)
 			}
 		case '|':
 			if l.peekNextChar() == '|' {
 				tok = l.newComplexToken(token.OR)
 			} else {
-				tok = newToken(token.ILLEGAL, l.char)
+				tok = l.newToken(token.ILLEGAL, l.char)
 			}
 		case '<':
 			if l.peekNextChar() == '=' {
 				tok = l.newComplexToken(token.LTEQUAL)
 			} else {
-				tok = newToken(token.LT, l.char)
+				tok = l.newToken(token.LT, l.char)
 			}
 		case '>':
 			if l.peekNextChar() == '=' {
 				tok = l.newComplexToken(token.GTEQUAL)
 			} else {
-				tok = newToken(token.GT, l.char)
+				tok = l.newToken(token.GT, l.char)
 			}
 		case ',':
-			tok = newToken(token.COMMA, l.char)
+			tok = l.newToken(token.COMMA, l.char)
 		case ';':
-			tok = newToken(token.SEMICOLON, l.char)
+			tok = l.newToken(token.SEMICOLON, l.char)
 		case ':':
-			tok = newToken(token.COLON, l.char)
+			tok = l.newToken(token.COLON, l.char)
 		case '(':
-			tok = newToken(token.LPAREN, l.char)
+			tok = l.newToken(token.LPAREN, l.char)
 		case ')':
-			tok = newToken(token.RPAREN, l.char)
+			tok = l.newToken(token.RPAREN, l.char)
 		case '{':
-			tok = newToken(token.LBRACE, l.char)
+			tok = l.newToken(token.LBRACE, l.char)
 		case '}':
-			tok = newToken(token.RBRACE, l.char)
+			tok = l.newToken(token.RBRACE, l.char)
 		case '"':
+			tok.Column = l.column  // I did it first of all to store the position of the beginning
+			tok.Line = l.line
 			tok.Literal = l.readString('"')
 			tok.Type = token.STRING
 			return tok
 		case '\'':
+			tok.Column = l.column 
+			tok.Line = l.line
 			tok.Literal = l.readString('\'')
 			tok.Type = token.STRING
 			return tok
@@ -127,18 +135,23 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Type = token.EOF
 		default:
 			if isLetter(l.char) {
+				tok.Column = l.column
+				tok.Line = l.line
 				tok.Literal = l.readIdentifier()
 				tok.Type = token.LookupIdent(tok.Literal)
 				return tok  // We can return because readIdentifier() makes what we need from readChar()
 			} else if isDigit(l.char) {
+				tok.Column = l.column
+				tok.Line = l.line
 				tok.Literal = l.readNumber()
 				tok.Type = token.INT
 				return tok
 			} else {
-				tok = newToken(token.ILLEGAL, l.char)
+				tok = l.newToken(token.ILLEGAL, l.char)
 			}
 	}
 	l.readChar()
+	fmt.Println(tok)
 	return tok
 }
 
@@ -150,10 +163,37 @@ func (l * Lexer) readChar() {
 	}
 	l.position = l.readPosition
 	l.readPosition++
+
+	if l.char == '\n' {
+		l.line++
+		l.column = 0
+	} else if l.char == '\t'{
+		l.column += 4  // My default tab size is gonna be 4. Maybe I must update smth here.
+	} else {
+		l.column++
+	}
 }
 
-func newToken (tokenType token.TokenType, char byte) token.Token {
-	return token.Token{Type: tokenType, Literal: string(char)}
+func (l *Lexer) newToken(tokenType token.TokenType, char byte) token.Token {
+	return token.Token{
+		Type: tokenType, 
+		Literal: string(char),
+		Line: l.line,
+		Column: l.column, 
+	}
+}
+
+func (l* Lexer) newComplexToken(tokenType token.TokenType) token.Token {
+	char := l.char
+	startColumn := l.column
+	l.readChar()
+	literal := string(char) + string(l.char)
+	return token.Token{
+		Type: tokenType, 
+		Literal: literal,
+		Line: l.line,
+		Column: startColumn, 
+	}
 }
 
 func (l *Lexer) readString(quoteType byte) string {
@@ -204,9 +244,3 @@ func (l* Lexer) peekNextChar() byte {
 	return l.input[l.readPosition]
 }
 
-func (l* Lexer) newComplexToken(tokenType token.TokenType) token.Token {
-	char := l.char
-	l.readChar()
-	literal := string(char) + string(l.char)
-	return token.Token{Type: tokenType, Literal: literal }
-}

@@ -1,8 +1,6 @@
 package lexer
 
 import (
-	"fmt"
-
 	"github.com/santos-404/myte/token"
 )
 
@@ -118,6 +116,11 @@ func (l *Lexer) NextToken() token.Token {
 			tok = l.newToken(token.LBRACE, l.char)
 		case '}':
 			tok = l.newToken(token.RBRACE, l.char)
+		case '.':
+			tok.Line = l.line
+			tok.Column = l.column
+			tok.Literal, tok.Type = l.readNumber()
+			return tok
 		case '"':
 			tok.Column = l.column  // I did it first of all to store the position of the beginning
 			tok.Line = l.line
@@ -141,17 +144,15 @@ func (l *Lexer) NextToken() token.Token {
 				tok.Type = token.LookupIdent(tok.Literal)
 				return tok  // We can return because readIdentifier() makes what we need from readChar()
 			} else if isDigit(l.char) {
-				tok.Column = l.column
 				tok.Line = l.line
-				tok.Literal = l.readNumber()
-				tok.Type = token.INT
+				tok.Column = l.column
+				tok.Literal, tok.Type = l.readNumber()
 				return tok
 			} else {
 				tok = l.newToken(token.ILLEGAL, l.char)
 			}
 	}
 	l.readChar()
-	fmt.Println(tok)
 	return tok
 }
 
@@ -214,12 +215,25 @@ func (l *Lexer) readIdentifier() string {
 	return l.input[startPos:l.position]
 }
 
-func (l *Lexer) readNumber() string {
+func (l *Lexer) readNumber() (string, token.TokenType) {
+	/*
+	This function iterate through the number updating the lexer via readChar()
+	It returns the literal of the number and the type. It can be either an int or a float
+	*/
 	startPos := l.position
+	
 	for isDigit(l.char) {
 		l.readChar()
 	}
-	return l.input[startPos:l.position]
+	if (l.char != '.') {
+		return l.input[startPos:l.position], token.INT
+	} 
+
+	l.readChar()
+	for isDigit(l.char) {
+		l.readChar()
+	}
+	return l.input[startPos:l.position], token.FLOAT
 }
 
 // This is a impactful point for the performance of the lang. Might be improved

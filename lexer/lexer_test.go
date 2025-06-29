@@ -334,3 +334,49 @@ if x != y {
 	}
 }
 
+func TestComments(t *testing.T) {
+	input := `
+# This is a full line comment
+const varWithComment = 0;  # A comment at the end of the line
+
+const varToTestIfTheEndOfTheCommentWorks = 1;
+
+# Comment with some weird values like 'example', / or ! .
+`
+
+	tests := []struct {
+		expectedType    token.TokenType
+		expectedLiteral string
+	}{
+		{token.COMMENT, "# This is a full line comment"},
+		{token.CONST, "const"},
+		{token.IDENT, "varWithComment"},
+		{token.ASSIGN, "="},
+		{token.INT, "0"},
+		{token.SEMICOLON, ";"},
+		{token.COMMENT, "# A comment at the end of the line"},
+		{token.CONST, "const"},
+		{token.IDENT, "varToTestIfTheEndOfTheCommentWorks"},
+		{token.ASSIGN, "="},
+		{token.INT, "1"},
+		{token.SEMICOLON, ";"},
+		{token.COMMENT, "# Comment with some weird values like 'example', / or ! ."},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+
+		if tok.Type != tt.expectedType {
+			t.Fatalf("TestComparisonOperators[%d] - token type wrong. expected=%q, got=%q",
+				i, tt.expectedType, tok.Type)
+		}
+
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("TestComparisonOperators[%d] - literal wrong. expected=%q, got=%q",
+				i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}
+

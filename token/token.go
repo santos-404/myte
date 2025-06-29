@@ -45,6 +45,8 @@ const (
 	RPAREN
 	LBRACE
 	RBRACE
+	LBRACKET
+	RBRACKET
 
 	FUNCTION
 	VAR
@@ -132,6 +134,8 @@ var tokenTypeStrings = [...]string{
 	")",
 	"{",
 	"}",
+	"[",
+	"]",
 	"FUNCTION",
 	"VAR",
 	"CONST",

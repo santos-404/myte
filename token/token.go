@@ -11,6 +11,7 @@ const (
 	INT
 	FLOAT
 	STRING
+	COMMENT
 
 	ASSIGN
 	PLUS
@@ -104,6 +105,7 @@ var tokenTypeStrings = [...]string{
 	"INT",
 	"FLOAT",
 	"STRING",
+	"COMMENT",
 	"=",
 	"+",
 	"++",

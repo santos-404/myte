@@ -102,6 +102,11 @@ func (l *Lexer) NextToken() token.Token {
 			} else {
 				tok = l.newToken(token.GT, l.char)
 			}
+		case '#':
+			tok.Column = l.column
+			tok.Line = l.line
+			tok.Literal = l.readComment()
+			tok.Type = token.COMMENT
 		case ',':
 			tok = l.newToken(token.COMMA, l.char)
 		case ';':
@@ -116,6 +121,10 @@ func (l *Lexer) NextToken() token.Token {
 			tok = l.newToken(token.LBRACE, l.char)
 		case '}':
 			tok = l.newToken(token.RBRACE, l.char)
+		case '[':
+			tok = l.newToken(token.LBRACKET, l.char)
+		case ']':
+			tok = l.newToken(token.RBRACKET, l.char)
 		case '.':
 			tok.Line = l.line
 			tok.Column = l.column
@@ -234,6 +243,14 @@ func (l *Lexer) readNumber() (string, token.TokenType) {
 		l.readChar()
 	}
 	return l.input[startPos:l.position], token.FLOAT
+}
+
+func (l* Lexer) readComment() string {
+	startPos := l.position 
+	for l.char != '\n' {
+		l.readChar()
+	}
+	return l.input[startPos:l.position]
 }
 
 // This is a impactful point for the performance of the lang. Might be improved

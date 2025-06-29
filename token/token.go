@@ -11,6 +11,7 @@ const (
 	INT
 	FLOAT
 	STRING
+	COMMENT
 
 	ASSIGN
 	PLUS
@@ -45,6 +46,8 @@ const (
 	RPAREN
 	LBRACE
 	RBRACE
+	LBRACKET
+	RBRACKET
 
 	FUNCTION
 	VAR
@@ -102,6 +105,7 @@ var tokenTypeStrings = [...]string{
 	"INT",
 	"FLOAT",
 	"STRING",
+	"COMMENT",
 	"=",
 	"+",
 	"++",
@@ -132,6 +136,8 @@ var tokenTypeStrings = [...]string{
 	")",
 	"{",
 	"}",
+	"[",
+	"]",
 	"FUNCTION",
 	"VAR",
 	"CONST",

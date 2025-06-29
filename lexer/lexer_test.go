@@ -239,12 +239,12 @@ const mixedQuotes = "'Hello', she said.";
 func TestNextTokenWithFloat(t *testing.T) {
 	input := `
 const startingWithNumber = 123.456;
-const startingWithPoint= .987;`
+const startingWithPoint= .987;
 
-// const operationWithFloats = fn (x, y) {
-// 	return 12.03 - .98;
-// }
-// `
+const operationWithFloats = fn (x, y) {
+	return 12.03 - .98;
+}
+`
 
 	tests := []struct {
 		expectedType   token.TokenType
@@ -262,22 +262,22 @@ const startingWithPoint= .987;`
 		{token.FLOAT, ".987"},
 		{token.SEMICOLON, ";"},
 
-		// {token.CONST, "const"},
-		// {token.IDENT, "operationWithFloats"},
-		// {token.ASSIGN, "="},
-		// {token.FUNCTION, "fn"},
-		// {token.LPAREN, "("},
-		// {token.IDENT, "x"},
-		// {token.COMMA, ","},
-		// {token.IDENT, "y"},
-		// {token.RPAREN, ")"},
-		// {token.LBRACE, "{"},
-		// {token.RETURN, "return"},
-		// {token.FLOAT, "12.03"},
-		// {token.MINUS, "-"},
-		// {token.FLOAT, ".98"},
-		// {token.SEMICOLON, ";"},
-		// {token.RBRACE, "}"},
+		{token.CONST, "const"},
+		{token.IDENT, "operationWithFloats"},
+		{token.ASSIGN, "="},
+		{token.FUNCTION, "fn"},
+		{token.LPAREN, "("},
+		{token.IDENT, "x"},
+		{token.COMMA, ","},
+		{token.IDENT, "y"},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
+		{token.RETURN, "return"},
+		{token.FLOAT, "12.03"},
+		{token.MINUS, "-"},
+		{token.FLOAT, ".98"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
 	}
 
 	l := New(input)
@@ -306,16 +306,16 @@ if x != y {
 		expectedLine int
 		expectedColumn int
 	}{
-		{1, 0},
-		{1, 3},
-		{1, 5},
-		{1, 8},
-		{1, 10},
-		{2, 4},
-		{2, 11},
+		{1, 1},
+		{1, 4},
+		{1, 6},
+		{1, 9},
+		{1, 11},
+		{2, 5},
 		{2, 12},
-		{2, 17},
-		{3, 0},
+		{2, 13},
+		{2, 18},
+		{3, 1},
 	}
 
 	l := New(input)
@@ -327,10 +327,10 @@ if x != y {
 			t.Fatalf("TestLineAndColumn[%d] - token line wrong. expected=%d, got=%d",
 				i, tt.expectedLine, tok.Line)
 		}
-		// if tok.Column!= tt.expectedColumn{
-		// 	t.Fatalf("TestLineAndColumn[%d] - token column wrong. expected=%d, got=%d",
-		// 		i, tt.expectedColumn, tok.Column)
-		// }
+		if tok.Column!= tt.expectedColumn{
+			t.Fatalf("TestLineAndColumn[%d] - token column wrong. expected=%d, got=%d",
+				i, tt.expectedColumn, tok.Column)
+		}
 	}
 }
 

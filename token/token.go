@@ -29,8 +29,6 @@ const (
 	SLASHEQUAL
 	PERCENT
 
-	AND
-	OR
 	LT
 	LTEQUAL
 	GT
@@ -54,6 +52,8 @@ const (
 	CONST
 	TRUE
 	FALSE
+	AND
+	OR
 	IF
 	ELSE
 	RETURN
@@ -79,6 +79,8 @@ var keywords = map[string]TokenType {
 	"var": VAR,
 	"true": TRUE,
 	"false": FALSE,
+	"and": AND,
+	"or": OR,
 	"if": IF,
 	"else": ELSE,
 	"return": RETURN,
@@ -121,8 +123,6 @@ var tokenTypeStrings = [...]string{
 	"//",
 	"/=",
 	"%",
-	"&&",
-	"||",
 	"<",
 	"<=",
 	">",
@@ -143,6 +143,8 @@ var tokenTypeStrings = [...]string{
 	"CONST",
 	"TRUE",
 	"FALSE",
+	"AND",
+	"OR",
 	"IF",
 	"ELSE",
 	"RETURN",

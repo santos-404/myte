@@ -12,7 +12,7 @@ func TestNextTokenLarge(t *testing.T) {
 const ten = 10;
 
 const addIfEqual = fn(x, y) {
-	if x == y {
+	if x == y or y == x {
 		return x + y;
 	}
 	return 0;
@@ -52,6 +52,10 @@ const result = add(five, ten);
 		{token.IDENT, "x"},
 		{token.EQ, "=="},
 		{token.IDENT, "y"},
+		{token.OR, "or"},
+		{token.IDENT, "y"},
+		{token.EQ, "=="},
+		{token.IDENT, "x"},
 		{token.LBRACE, "{"},
 		{token.RETURN, "return"},
 		{token.IDENT, "x"},

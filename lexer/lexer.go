@@ -78,18 +78,6 @@ func (l *Lexer) NextToken() token.Token {
 			}
 		case '%':
 			tok = l.newToken(token.PERCENT, l.char)
-		case '&':
-			if l.peekNextChar() == '&' {
-				tok = l.newComplexToken(token.AND)
-			} else {
-				tok = l.newToken(token.ILLEGAL, l.char)
-			}
-		case '|':
-			if l.peekNextChar() == '|' {
-				tok = l.newComplexToken(token.OR)
-			} else {
-				tok = l.newToken(token.ILLEGAL, l.char)
-			}
 		case '<':
 			if l.peekNextChar() == '=' {
 				tok = l.newComplexToken(token.LTEQUAL)
@@ -253,9 +241,8 @@ func (l* Lexer) readComment() string {
 	return l.input[startPos:l.position]
 }
 
-// This is a impactful point for the performance of the lang. Might be improved
 func isLetter(char byte) bool {
-	return 'a' <= char && char <= 'z' || 'A' <= char && char <= 'Z' || char == '_'  // This last is because to support snake_case
+	return 'a' <= char && char <= 'z' || 'A' <= char && char <= 'Z' || char == '_'  // This last is needed to support snake_case 
 }
 
 func isDigit(char byte) bool {

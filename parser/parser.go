@@ -99,6 +99,7 @@ func (p *Parser) peekCompareThenAdvance(expectedType token.TokenType) bool {
 	thing on this parser, I'm gonna implement it is a function. This can be discussed.
 	*/ 
 	if p.peekToken.Type != expectedType {
+		p.peekError(expectedType)
 		return false
 	}
 

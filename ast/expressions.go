@@ -4,3 +4,4 @@ type Expression interface {
 	Node
 	expressionNode()
 }
+

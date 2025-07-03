@@ -12,6 +12,23 @@ type Statement interface {
 }
 
 
+// This is a bit weird; I didn't knoe where to place this.
+// It's related w/ expressions but it's its statement 
+type ExpressionStatement struct {  
+	Token token.Token	
+	Expression Expression
+}
+
+func (es *ExpressionStatement) statementNode()			{}
+func (es *ExpressionStatement) TokenLiteral() string 	{ return es.Token.Literal }
+func (es *ExpressionStatement) String() string {
+	if es.Expression != nil {
+		return es.Expression.String()
+	}
+	return ""
+}
+
+
 type VarStatement struct {
 	Token token.Token  // This is the token.VAR
 	Name *Identifier

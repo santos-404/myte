@@ -134,17 +134,19 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Literal = ""
 			tok.Type = token.EOF
 		default:
-			if isLetter(l.char) {
+			// It's really important we start checking for digits beacuse we've added support to digits
+			// on isValidCharForIdent. Then, we don't want to go in that branch with an initial digit.
+			if isDigit(l.char) {
+				tok.Line = l.line
+				tok.Column = l.column
+				tok.Literal, tok.Type = l.readNumber()
+				return tok
+			} else if isValidCharForIdent(l.char) {
 				tok.Column = l.column
 				tok.Line = l.line
 				tok.Literal = l.readIdentifier()
 				tok.Type = token.LookupIdent(tok.Literal)
 				return tok  // We can return because readIdentifier() makes what we need from readChar()
-			} else if isDigit(l.char) {
-				tok.Line = l.line
-				tok.Column = l.column
-				tok.Literal, tok.Type = l.readNumber()
-				return tok
 			} else {
 				tok = l.newToken(token.ILLEGAL, l.char)
 			}
@@ -206,7 +208,7 @@ func (l *Lexer) readString(quoteType byte) string {
 
 func (l *Lexer) readIdentifier() string {
 	startPos := l.position
-	for isLetter(l.char) {
+	for isValidCharForIdent(l.char) {
 		l.readChar()
 	}
 	return l.input[startPos:l.position]
@@ -241,8 +243,11 @@ func (l* Lexer) readComment() string {
 	return l.input[startPos:l.position]
 }
 
-func isLetter(char byte) bool {
-	return 'a' <= char && char <= 'z' || 'A' <= char && char <= 'Z' || char == '_'  // This last is needed to support snake_case 
+func isValidCharForIdent(char byte) bool {
+	// The '_' is for having support to snake_case. The numbers are just here so 
+	// we accept contained digits but not at the start of an identifier
+	return 'a' <= char && char <= 'z' || 'A' <= char && char <= 'Z' || 
+		char == '_' || '0' <= char && char <= '9'
 }
 
 func isDigit(char byte) bool {

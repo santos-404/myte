@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/santos-404/myte/ast"
 	"github.com/santos-404/myte/lexer"
 	"github.com/santos-404/myte/token"
@@ -12,10 +14,16 @@ type Parser struct {
 	
 	currentToken token.Token
 	peekToken token.Token
+
+	errors []string
 }
 
+
 func New(l *lexer.Lexer) *Parser {
-	p := &Parser{l: l}
+	p := &Parser{
+		l: l,
+		errors: []string{},
+	}
 
 	// This way we set both current and peek tokens
 	p.nextToken()
@@ -74,6 +82,16 @@ func (p *Parser) parseVarStatement() *ast.VarStatement {
 }
 
 
+func (p *Parser) Errors () []string {
+	return p.errors
+}
+
+func (p *Parser) peekError(expectedType token.TokenType) {
+	msg := fmt.Sprintf("expected next token to be: %s, got: %s instead",
+		expectedType, p.peekToken.Type)
+	p.errors = append(p.errors, msg)
+}
+
 func (p *Parser) peekCompareThenAdvance(expectedType token.TokenType) bool {
 	/* 
 	At the beginning I thought was not a good idea to check the following token and 
@@ -87,3 +105,4 @@ func (p *Parser) peekCompareThenAdvance(expectedType token.TokenType) bool {
 	p.nextToken()
 	return true
 }
+

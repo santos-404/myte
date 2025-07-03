@@ -32,11 +32,9 @@ func New(l *lexer.Lexer) *Parser {
 	return p
 }
 
-func (p *Parser) nextToken() {
-	p.currentToken = p.peekToken
-	p.peekToken = p.l.NextToken()
+func (p *Parser) Errors () []string {
+	return p.errors
 }
-
 
 func (p *Parser) ParseProgram() *ast.Program { 
 	program := &ast.Program{}
@@ -54,36 +52,9 @@ func (p *Parser) ParseProgram() *ast.Program {
 }
 
 
-func (p *Parser) parseStatement() ast.Statement {
-	switch p.currentToken.Type {
-	case token.VAR:
-		return p.parseVarStatement()
-	default:
-		return nil
-	}
-}
-
-func (p *Parser) parseVarStatement() *ast.VarStatement {
-	stmt := &ast.VarStatement{Token: p.currentToken}
-
-	if !p.peekCompareThenAdvance(token.IDENT) {
-		return nil
-	}
-
-	stmt.Name = &ast.Identifier{Token: p.currentToken, Value: p.currentToken.Literal}
-	
-	// TODO: We don't have to wait for a semicolon, but for an assignment if the var
-	// is being initialized. If it's just being declared, then a semicolon is ok.
-	for p.currentToken.Type != token.SEMICOLON {
-		p.nextToken()
-	}
-
-	return stmt 
-}
-
-
-func (p *Parser) Errors () []string {
-	return p.errors
+func (p *Parser) nextToken() {
+	p.currentToken = p.peekToken
+	p.peekToken = p.l.NextToken()
 }
 
 func (p *Parser) peekError(expectedType token.TokenType) {

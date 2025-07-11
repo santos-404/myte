@@ -8,14 +8,21 @@ import (
 	"github.com/santos-404/myte/token"
 )
 
+type (
+	prefixParseFn func() ast.Expression
+	infixParseFn  func(ast.Expression) ast.Expression
+	// Here we can add the postfix operations. Thinking about implementing this.
+)
 
 type Parser struct {
 	l *lexer.Lexer
+	errors []string
 	
 	currentToken token.Token
 	peekToken token.Token
 
-	errors []string
+	prefixParseFns map[token.TokenType]prefixParseFn
+	infixParseFns map[token.TokenType]infixParseFn
 }
 
 
@@ -78,3 +85,11 @@ func (p *Parser) peekCompareThenAdvance(expectedType token.TokenType) bool {
 	return true
 }
 
+// These following two are just two helper methods to add things to our (pre/in)fix maps
+func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
+	p.prefixParseFns[tokenType] = fn
+}
+
+func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
+	p.infixParseFns[tokenType] = fn
+}

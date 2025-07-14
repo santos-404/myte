@@ -53,6 +53,30 @@ func (vs *VarStatement) String() string {
 	return out.String()
 }
 
+type ConstStatement struct {
+	Token token.Token  // This is the token.CONST
+	Name *Identifier
+	Value Expression 
+}
+
+func (cs *ConstStatement) statementNode()			{}
+func (cs *ConstStatement) TokenLiteral() string 	{ return cs.Token.Literal }
+func (cs *ConstStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(cs.TokenLiteral() + " ")
+	out.WriteString(cs.Name.String())
+	out.WriteString(" = ")
+
+	if cs.Value != nil {
+		out.WriteString(cs.Value.String())
+	}
+
+	out.WriteString(";")
+
+	return out.String()
+}
+
 type Identifier struct {
 	Token token.Token  // This one; the token.IDENT
 	Value string 
@@ -82,3 +106,4 @@ func (rs *ReturnStatement) String() string {
 
 	return out.String()
 }
+

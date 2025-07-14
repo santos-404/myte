@@ -153,6 +153,10 @@ func TestIdentifierExpressions(t *testing.T) {
 	if ident.Value != "foobar" {
 		t.Fatalf("ident.Value not %s. got=%s", "foobar", ident.Value)	
 	}
+	if ident.TokenLiteral() != "foobar" {
+		t.Fatalf("ident.TokenLiteral() not %s. got=%s", 
+		"foobar", ident.TokenLiteral())	
+	}
 }
 
 func TestIntegerLiteralExpression(t *testing.T) {
@@ -179,6 +183,10 @@ func TestIntegerLiteralExpression(t *testing.T) {
 		t.Fatalf("exp not *ast.IntegerLiteral. got=%T", stmt.Expression)	
 	}
 	if literal.Value != 5 {
-		t.Fatalf("ident.Value not %s. got=%d", "5", literal.Value)	
+		t.Fatalf("ident.Value not %d. got=%d", 5, literal.Value)	
+	}
+	if literal.TokenLiteral() != "5" {
+		t.Fatalf("ident.TokenLiteral() not %s. got=%s", 
+		"5", literal.TokenLiteral())	
 	}
 }

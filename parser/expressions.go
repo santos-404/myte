@@ -44,3 +44,7 @@ func (p *Parser) parseFloatLiteral() ast.Expression {
 	lit.Value = value
 	return lit 
 }
+
+func (p *Parser) parseStringLiteral() ast.Expression {
+	return &ast.StringLiteral{Token: p.currentToken, Value: p.currentToken.Literal}
+}

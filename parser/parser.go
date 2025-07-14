@@ -11,7 +11,7 @@ import (
 type (
 	prefixParseFn func() ast.Expression
 	infixParseFn  func(ast.Expression) ast.Expression
-	// Here we can add the postfix operations. Thinking about implementing this.
+	postfixParseFn func(ast.Expression) ast.Expression
 )
 
 type Parser struct {
@@ -23,6 +23,7 @@ type Parser struct {
 
 	prefixParseFns map[token.TokenType]prefixParseFn
 	infixParseFns map[token.TokenType]infixParseFn
+	postfixParseFns map[token.TokenType]postfixParseFn
 }
 
 
@@ -32,12 +33,16 @@ func New(l *lexer.Lexer) *Parser {
 		errors: []string{},
 	}
 
+	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
+	p.registerPrefix(token.IDENT, p.parseIdentifier)
+
 	// This way we set both current and peek tokens
 	p.nextToken()
 	p.nextToken()
 
 	return p
 }
+
 
 func (p *Parser) Errors () []string {
 	return p.errors
@@ -85,11 +90,15 @@ func (p *Parser) peekCompareThenAdvance(expectedType token.TokenType) bool {
 	return true
 }
 
-// These following two are just two helper methods to add things to our (pre/in)fix maps
+// These following three are just helper methods to add things to our (pre/in/post)fix maps
 func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
 	p.prefixParseFns[tokenType] = fn
 }
 
 func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 	p.infixParseFns[tokenType] = fn
+}
+
+func (p *Parser) registerPostfix(tokenType token.TokenType, fn postfixParseFn) {
+	p.postfixParseFns[tokenType] = fn
 }

@@ -5,6 +5,21 @@ import (
 	"github.com/santos-404/myte/token"
 )
 
+const (
+	// Here the iota, give constant incrementing number as values.
+	// We don't care about what numbers are they (from 0 due to the _)
+	// but the order is the important thing here
+	_ int = iota
+	LOWEST				// This is our equivalent to -infinite on numbers
+	EQUALS  			// ==
+	LESSGREATER 		// < | >
+	SUMSUBSTRACT		// + | -
+	PRODUCTDIVISION 	// * | / | //
+	MOD 				// % (I ain't that sure if this is the correct order here)
+	POWER 				// **
+	PREFIX 				// -X | !X
+	CALL 				// someFunction(X)
+)
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.currentToken.Type {
@@ -13,7 +28,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	default:
-		return nil
+		return p.parseExpressionStatement()	
 	}
 }
 
@@ -27,8 +42,8 @@ func (p *Parser) parseVarStatement() *ast.VarStatement {
 
 	stmt.Name = &ast.Identifier{Token: p.currentToken, Value: p.currentToken.Literal}
 	
-	// TODO: We don't have to wait for a semicolon, but for an assignment if the var
-	// is being initialized. If it's just being declared, then a semicolon is ok.I 
+	// TODO: We don't have to wait for a semicolon if the var is being 
+	// initialized. If it's just being declared, then a semicolon is ok
 	for p.currentToken.Type != token.SEMICOLON {
 		p.nextToken()
 	}
@@ -50,4 +65,17 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 
 	return stmt
 }
+
+func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
+	stmt := &ast.ExpressionStatement{Token: p.currentToken}
+
+	stmt.Expression = p.parseExpression(LOWEST)
+	
+	if p.peekToken.Type == token.SEMICOLON {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
 

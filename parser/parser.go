@@ -8,14 +8,22 @@ import (
 	"github.com/santos-404/myte/token"
 )
 
+type (
+	prefixParseFn func() ast.Expression
+	infixParseFn  func(ast.Expression) ast.Expression
+	postfixParseFn func(ast.Expression) ast.Expression
+)
 
 type Parser struct {
 	l *lexer.Lexer
+	errors []string
 	
 	currentToken token.Token
 	peekToken token.Token
 
-	errors []string
+	prefixParseFns map[token.TokenType]prefixParseFn
+	infixParseFns map[token.TokenType]infixParseFn
+	postfixParseFns map[token.TokenType]postfixParseFn
 }
 
 
@@ -25,6 +33,12 @@ func New(l *lexer.Lexer) *Parser {
 		errors: []string{},
 	}
 
+	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
+	p.registerPrefix(token.IDENT, p.parseIdentifier)
+	p.registerPrefix(token.INT, p.parseIntegerLiteral)
+	p.registerPrefix(token.FLOAT, p.parseFloatLiteral)
+	p.registerPrefix(token.STRING, p.parseStringLiteral)
+
 	// This way we set both current and peek tokens
 	p.nextToken()
 	p.nextToken()
@@ -32,11 +46,10 @@ func New(l *lexer.Lexer) *Parser {
 	return p
 }
 
-func (p *Parser) nextToken() {
-	p.currentToken = p.peekToken
-	p.peekToken = p.l.NextToken()
-}
 
+func (p *Parser) Errors () []string {
+	return p.errors
+}
 
 func (p *Parser) ParseProgram() *ast.Program { 
 	program := &ast.Program{}
@@ -54,36 +67,9 @@ func (p *Parser) ParseProgram() *ast.Program {
 }
 
 
-func (p *Parser) parseStatement() ast.Statement {
-	switch p.currentToken.Type {
-	case token.VAR:
-		return p.parseVarStatement()
-	default:
-		return nil
-	}
-}
-
-func (p *Parser) parseVarStatement() *ast.VarStatement {
-	stmt := &ast.VarStatement{Token: p.currentToken}
-
-	if !p.peekCompareThenAdvance(token.IDENT) {
-		return nil
-	}
-
-	stmt.Name = &ast.Identifier{Token: p.currentToken, Value: p.currentToken.Literal}
-	
-	// TODO: We don't have to wait for a semicolon, but for an assignment if the var
-	// is being initialized. If it's just being declared, then a semicolon is ok.
-	for p.currentToken.Type != token.SEMICOLON {
-		p.nextToken()
-	}
-
-	return stmt 
-}
-
-
-func (p *Parser) Errors () []string {
-	return p.errors
+func (p *Parser) nextToken() {
+	p.currentToken = p.peekToken
+	p.peekToken = p.l.NextToken()
 }
 
 func (p *Parser) peekError(expectedType token.TokenType) {
@@ -107,3 +93,15 @@ func (p *Parser) peekCompareThenAdvance(expectedType token.TokenType) bool {
 	return true
 }
 
+// These following three are just helper methods to add things to our (pre/in/post)fix maps
+func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
+	p.prefixParseFns[tokenType] = fn
+}
+
+func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
+	p.infixParseFns[tokenType] = fn
+}
+
+func (p *Parser) registerPostfix(tokenType token.TokenType, fn postfixParseFn) {
+	p.postfixParseFns[tokenType] = fn
+}

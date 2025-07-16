@@ -8,14 +8,14 @@ import (
 )
 
 func (p *Parser) parseExpression(precedence int) ast.Expression {
-	prefix := p.prefixParseFns[p.currentToken.Type]
-	if prefix == nil {
+	prefixParseFunction := p.prefixParseFns[p.currentToken.Type]
+	if prefixParseFunction == nil {
 		msg:= fmt.Sprintf("no prefix parse function for %s found", p.currentToken.Type)
 		p.errors = append(p.errors, msg)
 		return nil
 	}
 
-	leftExp := prefix()
+	leftExp := prefixParseFunction()
 	return leftExp
 }
 

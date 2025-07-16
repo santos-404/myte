@@ -10,6 +10,8 @@ import (
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.currentToken.Type]
 	if prefix == nil {
+		msg:= fmt.Sprintf("no prefix parse function for %s found", p.currentToken.Type)
+		p.errors = append(p.errors, msg)
 		return nil
 	}
 
@@ -48,3 +50,18 @@ func (p *Parser) parseFloatLiteral() ast.Expression {
 func (p *Parser) parseStringLiteral() ast.Expression {
 	return &ast.StringLiteral{Token: p.currentToken, Value: p.currentToken.Literal}
 }
+
+
+func (p *Parser) parsePrefixExpression() ast.Expression {
+	exp := &ast.PrefixExpression{
+		Token: p.currentToken,
+		Operator: p.currentToken.Literal,
+	}
+
+	p.nextToken()
+	
+	exp.Right = p.parseExpression(PREFIX)
+
+	return exp 
+}
+

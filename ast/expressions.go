@@ -1,6 +1,10 @@
 package ast
 
-import "github.com/santos-404/myte/token"
+import (
+	"bytes"
+
+	"github.com/santos-404/myte/token"
+)
 
 type Expression interface {
 	Node
@@ -36,3 +40,23 @@ type StringLiteral struct {
 func (sl *StringLiteral) expressionNode()      {}
 func (sl *StringLiteral) TokenLiteral() string { return sl.Token.Literal }
 func (sl *StringLiteral) String() string       { return sl.Token.Literal }
+
+
+type PrefixExpression struct {
+	Token token.Token  // Prefix token, e.g.: ! | -
+	Operator string 
+	Right Expression
+}
+
+func (pe *PrefixExpression) expressionNode()      {}
+func (pe *PrefixExpression) TokenLiteral() string { return pe.Token.Literal }
+func (pe *PrefixExpression) String() string       {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(pe.Operator)
+	out.WriteString(pe.Right.String())
+	out.WriteString(")")
+
+	return out.String()
+}

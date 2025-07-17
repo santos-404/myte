@@ -5,22 +5,6 @@ import (
 	"github.com/santos-404/myte/token"
 )
 
-const (
-	// Here the iota, give constant incrementing number as values.
-	// We don't care about what numbers are they (from 0 due to the _)
-	// but the order is the important thing here
-	_ int = iota
-	LOWEST				// This is our equivalent to -infinite on numbers
-	EQUALS  			// ==
-	LESSGREATER 		// < | >
-	SUMSUBSTRACT		// + | -
-	PRODUCTDIVISION 	// * | / | //
-	MOD 				// % (I ain't that sure if this is the correct order here)
-	POWER 				// **
-	PREFIX 				// -X | !X
-	CALL 				// someFunction(X)
-)
-
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.currentToken.Type {
 	case token.VAR:

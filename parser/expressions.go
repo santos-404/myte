@@ -5,17 +5,32 @@ import (
 	"strconv"
 
 	"github.com/santos-404/myte/ast"
+	"github.com/santos-404/myte/token"
 )
 
+
 func (p *Parser) parseExpression(precedence int) ast.Expression {
+	// This first prefix can be a number for instance 
 	prefixParseFunction := p.prefixParseFns[p.currentToken.Type]
 	if prefixParseFunction == nil {
-		msg:= fmt.Sprintf("no prefix parse function for %s found", p.currentToken.Type)
+		msg := fmt.Sprintf("no prefix parse function for %s found", p.currentToken.Type)
 		p.errors = append(p.errors, msg)
 		return nil
 	}
-
 	leftExp := prefixParseFunction()
+
+
+	for p.peekToken.Type != token.SEMICOLON && precedence < p.peekPrecedence() {
+		infixParseFunction := p.infixParseFns[p.peekToken.Type]
+		if infixParseFunction == nil {
+			return leftExp
+		}
+
+		p.nextToken()
+
+		leftExp = infixParseFunction(leftExp)
+	}
+		
 	return leftExp
 }
 
@@ -63,5 +78,18 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 	exp.Right = p.parseExpression(PREFIX)
 
 	return exp 
+}
+
+func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
+	exp := &ast.InfixExpression{
+		Token: p.currentToken,
+		Left: left,
+		Operator: p.currentToken.Literal,
+	}
+	precedence := p.currentPrecedence()
+	p.nextToken()
+	exp.Right = p.parseExpression(precedence)
+
+	return exp
 }
 

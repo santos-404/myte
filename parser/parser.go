@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/santos-404/myte/ast"
 	"github.com/santos-404/myte/lexer"
 	"github.com/santos-404/myte/token"
@@ -119,12 +117,6 @@ func (p *Parser) ParseProgram() *ast.Program {
 func (p *Parser) nextToken() {
 	p.currentToken = p.peekToken
 	p.peekToken = p.l.NextToken()
-}
-
-func (p *Parser) peekError(expectedType token.TokenType) {
-	msg := fmt.Sprintf("expected next token to be: %s, got: %s instead. Line: %d, column: %d",
-		expectedType, p.peekToken.Type, p.peekToken.Line, p.peekToken.Column)
-	p.errors = append(p.errors, msg)
 }
 
 func (p *Parser) peekCompareThenAdvance(expectedType token.TokenType) bool {

@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/santos-404/myte/ast"
@@ -13,8 +12,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	// This first prefix can be a number for instance 
 	prefixParseFunction := p.prefixParseFns[p.currentToken.Type]
 	if prefixParseFunction == nil {
-		msg := fmt.Sprintf("no prefix parse function for %s found", p.currentToken.Type)
-		p.errors = append(p.errors, msg)
+		p.noPrefixParseFunctionError(p.currentToken.Type)
 		return nil
 	}
 	leftExp := prefixParseFunction()
@@ -34,13 +32,13 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	return leftExp
 }
 
+
 func (p *Parser) parseIntegerLiteral() ast.Expression {
 	lit := &ast.IntegerLiteral{Token: p.currentToken}
 
 	value, err := strconv.ParseInt(p.currentToken.Literal, 0, 64)
 	if err != nil {
-		msg := fmt.Sprintf("could not parse %q as integer)", p.currentToken.Literal)
-		p.errors = append(p.errors, msg)
+		p.parsingLiteralError("integer", p.currentToken.Literal)
 		return nil
 	}
 
@@ -53,8 +51,7 @@ func (p *Parser) parseFloatLiteral() ast.Expression {
 
 	value, err := strconv.ParseFloat(p.currentToken.Literal, 64)
 	if err != nil {
-		msg := fmt.Sprintf("could not parse %q as float)", p.currentToken.Literal)
-		p.errors = append(p.errors, msg)
+		p.parsingLiteralError("float", p.currentToken.Literal)
 		return nil
 	}
 

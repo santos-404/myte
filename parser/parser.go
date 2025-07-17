@@ -1,12 +1,42 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/santos-404/myte/ast"
 	"github.com/santos-404/myte/lexer"
 	"github.com/santos-404/myte/token"
 )
+
+const (
+	// Here the iota, give constant incrementing number as values.
+	// We don't care about what numbers are they (from 0 due to the _)
+	// but the order is the important thing here
+	_ int = iota
+	LOWEST				// This is our equivalent to -infinite on numbers
+	EQUALS  			// ==
+	LESSGREATER 		// < | >
+	SUMSUBSTRACT		// + | -
+	PRODUCTDIVISION 	// * | / | //
+	MOD 				// % (I ain't that sure if this is the correct order here)
+	POWER 				// **
+	PREFIX 				// -X | !X
+	CALL 				// someFunction(X)
+)
+
+var precedences = map[token.TokenType]int {
+	token.EQ: 			EQUALS,
+	token.NOTEQ: 		EQUALS,
+	token.GT: 			LESSGREATER,
+	token.GTEQUAL: 		LESSGREATER,
+	token.LT: 			LESSGREATER,
+	token.LTEQUAL: 		LESSGREATER,
+	token.PLUS: 		SUMSUBSTRACT,
+	token.MINUS: 		SUMSUBSTRACT,
+	token.STAR: 		PRODUCTDIVISION,
+	token.SLASH: 		PRODUCTDIVISION,
+	token.DOUBLESLASH: 	PRODUCTDIVISION,
+	token.PERCENT: 		MOD,
+	token.DOUBLESTAR: 	POWER,
+}
 
 type (
 	prefixParseFn func() ast.Expression
@@ -38,6 +68,23 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 	p.registerPrefix(token.FLOAT, p.parseFloatLiteral)
 	p.registerPrefix(token.STRING, p.parseStringLiteral)
+	p.registerPrefix(token.BANG, p.parsePrefixExpression)
+	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
+
+	p.infixParseFns = make(map[token.TokenType]infixParseFn)
+	p.registerInfix(token.EQ, p.parseInfixExpression)
+	p.registerInfix(token.NOTEQ, p.parseInfixExpression)
+	p.registerInfix(token.GT, p.parseInfixExpression)
+	p.registerInfix(token.GTEQUAL, p.parseInfixExpression)
+	p.registerInfix(token.LT, p.parseInfixExpression)
+	p.registerInfix(token.LTEQUAL, p.parseInfixExpression)
+	p.registerInfix(token.PLUS, p.parseInfixExpression)
+	p.registerInfix(token.MINUS, p.parseInfixExpression)
+	p.registerInfix(token.STAR, p.parseInfixExpression)
+	p.registerInfix(token.SLASH, p.parseInfixExpression)
+	p.registerInfix(token.DOUBLESLASH, p.parseInfixExpression)
+	p.registerInfix(token.PERCENT, p.parseInfixExpression)
+	p.registerInfix(token.DOUBLESTAR, p.parseInfixExpression)
 
 	// This way we set both current and peek tokens
 	p.nextToken()
@@ -72,12 +119,6 @@ func (p *Parser) nextToken() {
 	p.peekToken = p.l.NextToken()
 }
 
-func (p *Parser) peekError(expectedType token.TokenType) {
-	msg := fmt.Sprintf("expected next token to be: %s, got: %s instead. Line: %d, column: %d",
-		expectedType, p.peekToken.Type, p.peekToken.Line, p.peekToken.Column)
-	p.errors = append(p.errors, msg)
-}
-
 func (p *Parser) peekCompareThenAdvance(expectedType token.TokenType) bool {
 	/* 
 	At the beginning I thought was not a good idea to check the following token and 
@@ -104,4 +145,19 @@ func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 
 func (p *Parser) registerPostfix(tokenType token.TokenType, fn postfixParseFn) {
 	p.postfixParseFns[tokenType] = fn
+}
+
+
+func (p *Parser) peekPrecedence() int {
+	if prec, ok := precedences[p.peekToken.Type]; ok {
+		return prec
+	}
+	return LOWEST
+}
+
+func (p *Parser) currentPrecedence() int {
+	if prec, ok := precedences[p.currentToken.Type]; ok {
+		return prec
+	}
+	return LOWEST
 }

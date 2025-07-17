@@ -1,29 +1,44 @@
 package parser
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/santos-404/myte/ast"
+	"github.com/santos-404/myte/token"
 )
 
+
 func (p *Parser) parseExpression(precedence int) ast.Expression {
-	prefix := p.prefixParseFns[p.currentToken.Type]
-	if prefix == nil {
+	// This first prefix can be a number for instance 
+	prefixParseFunction := p.prefixParseFns[p.currentToken.Type]
+	if prefixParseFunction == nil {
+		p.noPrefixParseFunctionError(p.currentToken.Type)
 		return nil
 	}
+	leftExp := prefixParseFunction()
 
-	leftExp := prefix()
+
+	for p.peekToken.Type != token.SEMICOLON && precedence < p.peekPrecedence() {
+		infixParseFunction := p.infixParseFns[p.peekToken.Type]
+		if infixParseFunction == nil {
+			return leftExp
+		}
+
+		p.nextToken()
+
+		leftExp = infixParseFunction(leftExp)
+	}
+		
 	return leftExp
 }
+
 
 func (p *Parser) parseIntegerLiteral() ast.Expression {
 	lit := &ast.IntegerLiteral{Token: p.currentToken}
 
 	value, err := strconv.ParseInt(p.currentToken.Literal, 0, 64)
 	if err != nil {
-		msg := fmt.Sprintf("could not parse %q as integer)", p.currentToken.Literal)
-		p.errors = append(p.errors, msg)
+		p.parsingLiteralError("integer", p.currentToken.Literal)
 		return nil
 	}
 
@@ -36,8 +51,7 @@ func (p *Parser) parseFloatLiteral() ast.Expression {
 
 	value, err := strconv.ParseFloat(p.currentToken.Literal, 64)
 	if err != nil {
-		msg := fmt.Sprintf("could not parse %q as float)", p.currentToken.Literal)
-		p.errors = append(p.errors, msg)
+		p.parsingLiteralError("float", p.currentToken.Literal)
 		return nil
 	}
 
@@ -48,3 +62,31 @@ func (p *Parser) parseFloatLiteral() ast.Expression {
 func (p *Parser) parseStringLiteral() ast.Expression {
 	return &ast.StringLiteral{Token: p.currentToken, Value: p.currentToken.Literal}
 }
+
+
+func (p *Parser) parsePrefixExpression() ast.Expression {
+	exp := &ast.PrefixExpression{
+		Token: p.currentToken,
+		Operator: p.currentToken.Literal,
+	}
+
+	p.nextToken()
+	
+	exp.Right = p.parseExpression(PREFIX)
+
+	return exp 
+}
+
+func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
+	exp := &ast.InfixExpression{
+		Token: p.currentToken,
+		Left: left,
+		Operator: p.currentToken.Literal,
+	}
+	precedence := p.currentPrecedence()
+	p.nextToken()
+	exp.Right = p.parseExpression(precedence)
+
+	return exp
+}
+

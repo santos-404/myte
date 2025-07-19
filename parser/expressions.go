@@ -103,15 +103,39 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	return exp
 }
 
+// THIS IS FUCKING MAGICAL
 func (p *Parser) parseGroupedExpression() ast.Expression {
 	p.nextToken()
 	
 	exp := p.parseExpression(LOWEST)
 
-	// THIS IS FUCKING MAGICAL
 	if !p.peekCompareThenAdvance(token.RPAREN) { 
 		return nil
 	}
 
 	return exp
 }
+
+func (p *Parser) parseIfExpression() ast.Expression {
+	exp := &ast.IfExpression{Token: p.currentToken}
+
+	if !p.peekCompareThenAdvance(token.LPAREN) {
+		return nil  // TODO: Throw an error here
+	}
+
+	p.nextToken()
+	exp.Condition = p.parseExpression(LOWEST)
+
+	if !p.peekCompareThenAdvance(token.RPAREN) { 
+		return nil  // TODO: errrrrrrrrrrrr
+	}
+
+	if !p.peekCompareThenAdvance(token.LBRACE) {
+		return nil  // TODO: errrrrrrrrrrrr
+	}
+
+	exp.Consequence = p.parseBlockStatement()
+
+	return exp 
+}
+

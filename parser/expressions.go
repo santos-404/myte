@@ -103,3 +103,15 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	return exp
 }
 
+func (p *Parser) parseGroupedExpression() ast.Expression {
+	p.nextToken()
+	
+	exp := p.parseExpression(LOWEST)
+
+	// THIS IS FUCKING MAGICAL
+	if !p.peekCompareThenAdvance(token.RPAREN) { 
+		return nil
+	}
+
+	return exp
+}

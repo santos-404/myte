@@ -13,12 +13,12 @@ func (p *Parser) peekError(expectedType token.TokenType) {
 	p.errors = append(p.errors, msg)
 }
 
-func (p *Parser) noPrefixParseFunctionError(tt token.TokenType) {
+func (p *Parser) noPrefixParseFunctionError() {
 	msg := fmt.Sprintf("no prefix parse function for %s found", p.currentToken.Type)
 	p.errors = append(p.errors, msg)
 }
 
-func (p *Parser) parsingLiteralError(parseTo, literal string) {
+func (p *Parser) parsingLiteralError(parseTo string) {
 	msg := fmt.Sprintf("could not parse %q as %s)", p.currentToken.Literal, parseTo)
 	p.errors = append(p.errors, msg)
 }

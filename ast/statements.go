@@ -91,6 +91,7 @@ type ReturnStatement struct {
 	Token token.Token
 	ReturnValue Expression
 }
+
 func (rs *ReturnStatement) statementNode() 			{}
 func (rs *ReturnStatement) TokenLiteral() string	{ return rs.Token.Literal }
 func (rs *ReturnStatement) String() string {
@@ -107,3 +108,23 @@ func (rs *ReturnStatement) String() string {
 	return out.String()
 }
 
+
+type BlockStatement struct {
+	Token token.Token  // The { token
+	Statements []Statement
+}
+
+func (bs *BlockStatement) statementNode() 			{}
+func (bs *BlockStatement) TokenLiteral() string	{ return bs.Token.Literal }
+func (bs *BlockStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(bs.TokenLiteral()) 
+	for _, stmt := range bs.Statements {
+		out.WriteString(stmt.String())
+	}
+	out.WriteString("}") 
+
+
+	return out.String()
+}

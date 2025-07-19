@@ -138,7 +138,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 
 	if p.peekToken.Type == token.ELSE { 
 		p.nextToken()
-		if p.peekCompareThenAdvance(token.LBRACE) {
+		if !p.peekCompareThenAdvance(token.LBRACE) {
 			return nil
 		}
 

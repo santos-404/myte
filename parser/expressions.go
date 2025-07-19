@@ -63,6 +63,19 @@ func (p *Parser) parseStringLiteral() ast.Expression {
 	return &ast.StringLiteral{Token: p.currentToken, Value: p.currentToken.Literal}
 }
 
+func (p *Parser) parseBooleanLiteral() ast.Expression {
+	lit := &ast.BooleanLiteral{Token: p.currentToken}
+
+	value, err := strconv.ParseBool(p.currentToken.Literal) 
+	if err != nil {
+		p.parsingLiteralError("bool", p.currentToken.Literal)	
+		return nil
+	}
+
+	lit.Value = value
+	return lit
+}
+
 
 func (p *Parser) parsePrefixExpression() ast.Expression {
 	exp := &ast.PrefixExpression{

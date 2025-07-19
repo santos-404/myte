@@ -42,6 +42,16 @@ func (sl *StringLiteral) TokenLiteral() string { return sl.Token.Literal }
 func (sl *StringLiteral) String() string       { return sl.Token.Literal }
 
 
+type BooleanLiteral struct {
+	Token token.Token
+	Value bool
+}
+
+func (bl *BooleanLiteral) expressionNode()      {}
+func (bl *BooleanLiteral) TokenLiteral() string { return bl.Token.Literal }
+func (bl *BooleanLiteral) String() string       { return bl.Token.Literal }
+
+
 type PrefixExpression struct {
 	Token token.Token  // Prefix token, e.g.: ! | -
 	Operator string 
@@ -82,3 +92,4 @@ func (ie *InfixExpression) String() string       {
 
 	return out.String()
 }
+

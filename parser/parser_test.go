@@ -690,7 +690,7 @@ func TestFunctionLiteralParsing(t *testing.T) {
 	if !ok {
 		t.Fatalf("program.Statements[0] is not an ast.ExpressionStatemnt. got=%T", 
 			program.Statements[0])
-	}
+	}	
 
 	function, ok := stmt.Expression.(*ast.FunctionLiteral) 
 	if !ok {
@@ -724,3 +724,34 @@ func TestFunctionLiteralParsing(t *testing.T) {
 	}
 }
 
+func TestFunctionParameterParsing(t *testing.T) {
+	tests := []struct{
+		inputFunction string
+		expectedParams []string
+	} {
+		{"fn() {};", []string{}},
+		{"fn(x) {};", []string{"x"}},
+		{"fn(x, y, z) {};", []string{"x", "y", "z"}},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.inputFunction)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		stmt := program.Statements[0].(*ast.ExpressionStatement)
+		function := stmt.Expression.(*ast.FunctionLiteral)
+
+		if len(function.Parameters) != len(tt.expectedParams) {
+			t.Errorf("length parameters wrong. want=%d. got=%d",
+				len(tt.expectedParams), len(function.Parameters))
+		}
+
+		for i, ident := range tt.expectedParams {
+			if !testLiteralExpression(t, function.Parameters[i], ident) {
+				return 
+			}
+		}
+	}
+}

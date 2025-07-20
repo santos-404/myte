@@ -327,7 +327,9 @@ func TestParsingPrefixExpressions(t *testing.T) {
 			t.Fatalf("exp.Operator is not %s. got=%s", tt.operator, exp.Operator)
 		}
 
-		testLiteralExpression(t, exp.Right, tt.integerValue)
+		if !testLiteralExpression(t, exp.Right, tt.integerValue) {
+		return 
+		}
 	}
 }
 
@@ -397,8 +399,12 @@ func TestParsingInfixExpressions(t *testing.T) {
 			t.Fatalf("exp.Operator is not %s. got=%s", tt.operator, exp.Operator)
 		}
 
-		testLiteralExpression(t, exp.Left, tt.leftValue) 
-		testLiteralExpression(t, exp.Right, tt.rightValue) 
+		if !testLiteralExpression(t, exp.Left, tt.leftValue)  {
+			return 
+		}
+		if !testLiteralExpression(t, exp.Right, tt.rightValue)  {
+			return 
+		}
 		
 	}
 }
@@ -600,7 +606,9 @@ func TestIfExpression(t *testing.T) {
 			exp.Consequence.Statements[0])
 	}
 
-	testIdentifier(t, consequence.Expression, "x")
+	if !testIdentifier(t, consequence.Expression, "x") {
+		return
+	}
 
 	if exp.Alternative != nil {
 		t.Errorf("exp.Alternative.Statements was not nil. got=%+v", exp.Alternative)
@@ -644,7 +652,9 @@ func TestIfElseExpression(t *testing.T) {
 			exp.Consequence.Statements[0])
 	}
 
-	testIdentifier(t, consequence.Expression, "x")
+	if !testIdentifier(t, consequence.Expression, "x") {
+		return 
+	}
 
 	if len(exp.Alternative.Statements) != 1 {
 		t.Errorf("alternateive is not 1 statements. got=%d", len(exp.Consequence.Statements))
@@ -656,7 +666,9 @@ func TestIfElseExpression(t *testing.T) {
 			exp.Alternative.Statements[0])
 	}
 
-	testIdentifier(t, alternative.Expression, "y")
+	if !testIdentifier(t, alternative.Expression, "y") {
+		return 
+	}
 }
 
 
@@ -689,8 +701,12 @@ func TestFunctionLiteralParsing(t *testing.T) {
 		t.Errorf("function literal parameter wrong. want=2. got=%d", len(function.Parameters))
 	}
 
-	testLiteralExpression(t, function.Parameters[0], "x")
-	testLiteralExpression(t, function.Parameters[1], "y")
+	if !testLiteralExpression(t, function.Parameters[0], "x") {
+		return 
+	}
+	if !testLiteralExpression(t, function.Parameters[1], "y") {
+		return 
+	}
 
 	if len(function.Body.Statements) != 1 {
 		t.Fatalf("function.Body.Statements has not 1 statements, got=%d", 
@@ -703,6 +719,8 @@ func TestFunctionLiteralParsing(t *testing.T) {
 			function.Body.Statements[0])
 	}
 
-	testInfixExpression(t, bodyStmt.Expression, "x", "+", "y")
+	if !testInfixExpression(t, bodyStmt.Expression, "x", "+", "y") {
+		return 
+	}
 }
 

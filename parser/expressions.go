@@ -127,7 +127,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	exp.Condition = p.parseExpression(LOWEST)
 
 	if !p.peekCompareThenAdvance(token.RPAREN) { 
-		return nil  // TODO: errrrrrrrrrrrr
+		return nil  // TODO: errrrrrrrrrrr
 	}
 
 	if !p.peekCompareThenAdvance(token.LBRACE) {
@@ -148,3 +148,35 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	return exp 
 }
 
+
+func (p *Parser) parseFnLiteral() ast.Expression {
+	exp := &ast.FunctionLiteral{Token: p.currentToken}
+
+	if !p.peekCompareThenAdvance(token.LPAREN) {
+		return nil	
+	}
+
+	exp.Parameters = p.parseParameters()
+
+	exp.Body = p.parseBlockStatement()
+	
+	return exp
+}
+
+func (p *Parser) parseParameters() []*ast.Identifier {
+	var params []*ast.Identifier
+	p.nextToken()  // We start at '('
+
+	for p.currentToken.Type != token.RPAREN {
+		literal := &ast.Identifier{Token: p.currentToken, Value: p.currentToken.Literal}
+		params = append(params, literal)
+
+		p.nextToken()
+		if p.currentToken.Literal == "," {
+			p.nextToken()
+		}
+	}
+
+	p.nextToken()  // We are at ')'
+	return params
+}

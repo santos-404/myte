@@ -6,6 +6,9 @@ This is an early-stage project, and **Myte is not yet fully implemented or usabl
 
 If you're curious about the goals and design of Myte, check out the [CONTEXT.md](./CONTEXT.md) file, where you'll find more in-depth information on the project.
 
+
+For instructions on building and running Myte from source, see the [Getting Started guide on the wiki](https://github.com/santos-404/myte/wiki/Getting-Started).
+
 ---
 
 ## Contribution guidelines

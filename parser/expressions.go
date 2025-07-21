@@ -119,16 +119,8 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 func (p *Parser) parseIfExpression() ast.Expression {
 	exp := &ast.IfExpression{Token: p.currentToken}
 
-	if !p.peekCompareThenAdvance(token.LPAREN) {
-		return nil  // TODO: Throw an error here
-	}
-
 	p.nextToken()
 	exp.Condition = p.parseExpression(LOWEST)
-
-	if !p.peekCompareThenAdvance(token.RPAREN) { 
-		return nil  // TODO: errrrrrrrrrrr
-	}
 
 	if !p.peekCompareThenAdvance(token.LBRACE) {
 		return nil  // TODO: errrrrrrrrrrrr
@@ -179,4 +171,20 @@ func (p *Parser) parseParameters() []*ast.Identifier {
 
 	p.nextToken()  // We are at ')'
 	return params
+}
+
+
+func (p *Parser) parseForExpression() ast.Expression {
+	exp := &ast.ForExpression{Token: p.currentToken}
+
+	p.nextToken()
+	exp.Condition = p.parseExpression(LOWEST)
+
+	if !p.peekCompareThenAdvance(token.LBRACE) {
+		return nil  
+	}
+
+	exp.Body = p.parseBlockStatement()
+
+	return exp
 }

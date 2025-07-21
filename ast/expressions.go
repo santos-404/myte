@@ -145,3 +145,24 @@ func (fl *FunctionLiteral) String() string       {
 
 	return out.String()
 }
+
+
+type ForExpression struct {
+	Token token.Token  // The 'for' token
+	Condition Expression
+	Body *BlockStatement
+}
+
+func (fe *ForExpression) expressionNode()      {}
+func (fe *ForExpression) TokenLiteral() string { return fe.Token.Literal }
+func (fe *ForExpression) String() string       {
+	var out bytes.Buffer
+
+	out.WriteString(fe.Token.Literal)
+	out.WriteString(fe.Condition.String())
+	out.WriteString(" ")
+	out.WriteString(fe.Body.String())
+
+	return out.String()
+}
+

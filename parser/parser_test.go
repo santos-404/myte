@@ -757,3 +757,47 @@ func TestFunctionParameterParsing(t *testing.T) {
 		}
 	}
 }
+
+
+func TestForLoopLiteralFormat1(t *testing.T) {
+	input := "for i < y { ++i; }"
+
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statements. got=%d",
+			len(program.Statements))
+	}
+	
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not an ast.ExpressionStatemnt. got=%T", 
+			program.Statements[0])
+	}	
+
+	exp, ok := stmt.Expression.(*ast.ForExpression) 
+	if !ok {
+		t.Fatalf("stmt.Expression not *ast.ForExpression. got=%T", stmt.Expression)	
+	}
+
+	if !testInfixExpression(t, exp.Condition, "i", "<", "y") {
+		return
+	}
+
+	if len(exp.Body.Statements) != 1 {
+		t.Errorf("body is not 1 statements. got=%d", len(exp.Body.Statements))
+	}
+
+	_, ok = exp.Body.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Statments[0] is not an ast.ExpressionStatement. got=%T",
+			exp.Body.Statements[0])
+	}
+
+
+}
+

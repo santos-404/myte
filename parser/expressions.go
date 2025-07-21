@@ -180,3 +180,19 @@ func (p *Parser) parseParameters() []*ast.Identifier {
 	p.nextToken()  // We are at ')'
 	return params
 }
+
+
+func (p *Parser) parseForExpression() ast.Expression {
+	exp := &ast.ForExpression{Token: p.currentToken}
+
+	p.nextToken()
+	exp.Condition = p.parseExpression(LOWEST)
+
+	if !p.peekCompareThenAdvance(token.LBRACE) {
+		return nil  
+	}
+
+	exp.Body = p.parseBlockStatement()
+
+	return exp
+}

@@ -166,3 +166,26 @@ func (fe *ForExpression) String() string       {
 	return out.String()
 }
 
+type CallExpression struct {
+	Token token.Token  // The '(' token
+	Function Expression	
+	Arguments []Expression	
+}
+
+func (ce *CallExpression) expressionNode()      {}
+func (ce *CallExpression) TokenLiteral() string { return ce.Token.Literal }
+func (ce *CallExpression) String() string       {
+	var out bytes.Buffer
+	var args []string
+
+	out.WriteString(ce.Function.String())
+	out.WriteString(ce.Token.Literal)
+
+	for _, arg := range ce.Arguments {
+		args = append(args, arg.String())	
+	}
+	out.WriteString(strings.Join(args, ","))
+
+	return out.String()
+}
+

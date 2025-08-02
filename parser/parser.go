@@ -36,6 +36,7 @@ var precedences = map[token.TokenType]int {
 	token.DOUBLESLASH: 	PRODUCTDIVISION,
 	token.PERCENT: 		MOD,
 	token.DOUBLESTAR: 	POWER,
+	token.LPAREN: 		CALL,
 }
 
 type (
@@ -93,6 +94,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.DOUBLESLASH, p.parseInfixExpression)
 	p.registerInfix(token.PERCENT, p.parseInfixExpression)
 	p.registerInfix(token.DOUBLESTAR, p.parseInfixExpression)
+	p.registerInfix(token.LPAREN, p.parseCallExpression)
 
 	// This way we set both current and peek tokens
 	p.nextToken()

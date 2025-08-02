@@ -188,3 +188,26 @@ func (p *Parser) parseForExpression() ast.Expression {
 
 	return exp
 }
+
+
+func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
+	exp := &ast.CallExpression{Token: p.currentToken, Function: function}
+	exp.Arguments = p.parseCallArguments()
+	return exp
+}
+
+func (p *Parser) parseCallArguments() []ast.Expression {
+	var args []ast.Expression
+	p.nextToken()
+
+	for p.currentToken.Type != token.RPAREN {
+		args = append(args, p.parseExpression(LOWEST))	
+
+		p.nextToken()
+		if p.currentToken.Type == token.COMMA {
+			p.nextToken()
+		}
+	}
+
+	return args
+}

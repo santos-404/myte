@@ -458,6 +458,14 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 			"!(true == true)",
 			"(!(true == true))",
 		},
+		{
+			"foo + bar(foo * foo) + 12",
+			"((foo + bar((foo * foo))) + 12)",
+		},
+		{
+			"foo(a, b, 1, 2 * 3, 2 + 2 * 3, 6 > 2)",
+			"foo(a, b, 1, (2 * 3), (2 + (2 * 3)), (6 > 2))",
+		},
 	}
 
 	for _, tt := range tests {

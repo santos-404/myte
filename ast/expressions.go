@@ -184,7 +184,8 @@ func (ce *CallExpression) String() string       {
 	for _, arg := range ce.Arguments {
 		args = append(args, arg.String())	
 	}
-	out.WriteString(strings.Join(args, ","))
+	out.WriteString(strings.Join(args, ", "))
+	out.WriteString(")")
 
 	return out.String()
 }

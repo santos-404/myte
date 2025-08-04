@@ -211,3 +211,8 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 
 	return args
 }
+
+
+func (p *Parser) parseCommentExpression() ast.Expression {
+	return &ast.CommentExpression{Token: p.currentToken}
+}

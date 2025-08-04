@@ -889,3 +889,49 @@ func TestCallExpression(t *testing.T) {
 	testLiteralExpression(t, exp.Arguments[2], "bar")
 }
 
+
+func TestCommentExpressions(t *testing.T) {
+	input := `
+# comment
+
+#-
+multiple-line comment
+-#
+`
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if program == nil {
+		t.Fatalf("ParseProgram() returned nil")
+	}
+	if len(program.Statements) != 2 {
+		t.Fatalf("program.Statements does not contain 2 statements. got=%d",
+			len(program.Statements))
+	}
+
+	tests := []struct {
+		expectedIdentifier string
+	}{
+		{"Comment"},
+		{"Comment"},
+	}
+
+	for i, _ := range tests {
+		stmt, ok := program.Statements[i].(*ast.ExpressionStatement)
+		if !ok {
+			t.Fatalf("program.Statements[i] is not an ast.ExpressionStatemnt. got=%T", 
+			program.Statements[i])
+		}	
+
+		_, ok = stmt.Expression.(*ast.CommentExpression) 
+		if !ok {
+			t.Fatalf("stmt.Expression not *ast.CommentExpression. got=%T", stmt.Expression)	
+		}
+	}
+
+}
+
+

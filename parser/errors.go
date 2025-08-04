@@ -14,11 +14,13 @@ func (p *Parser) peekError(expectedType token.TokenType) {
 }
 
 func (p *Parser) noPrefixParseFunctionError() {
-	msg := fmt.Sprintf("no prefix parse function for %s found", p.currentToken.Type)
+	msg := fmt.Sprintf("no prefix parse function for %s found. Line: %d, column: %d", 
+		p.currentToken.Type, p.currentToken.Line, p.currentToken.Column)
 	p.errors = append(p.errors, msg)
 }
 
 func (p *Parser) parsingLiteralError(parseTo string) {
-	msg := fmt.Sprintf("could not parse %q as %s)", p.currentToken.Literal, parseTo)
+	msg := fmt.Sprintf("could not parse %q as %s. Line: %d, column: %d", 
+		p.currentToken.Literal, parseTo, p.currentToken.Line, p.currentToken.Column)
 	p.errors = append(p.errors, msg)
 }

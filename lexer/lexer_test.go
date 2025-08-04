@@ -345,6 +345,12 @@ const varWithComment = 0;  # A comment at the end of the line
 
 const varToTestIfTheEndOfTheCommentWorks = 1;
 
+#-
+	Multiple-line comment
+
+	const foo = 0;
+-#
+
 # Comment with some weird values like 'example', / or ! .
 `
 
@@ -352,19 +358,20 @@ const varToTestIfTheEndOfTheCommentWorks = 1;
 		expectedType    token.TokenType
 		expectedLiteral string
 	}{
-		{token.COMMENT, "# This is a full line comment"},
+		{token.COMMENT, "Comment"},
 		{token.CONST, "const"},
 		{token.IDENT, "varWithComment"},
 		{token.ASSIGN, "="},
 		{token.INT, "0"},
 		{token.SEMICOLON, ";"},
-		{token.COMMENT, "# A comment at the end of the line"},
+		{token.COMMENT, "Comment"},
 		{token.CONST, "const"},
 		{token.IDENT, "varToTestIfTheEndOfTheCommentWorks"},
 		{token.ASSIGN, "="},
 		{token.INT, "1"},
 		{token.SEMICOLON, ";"},
-		{token.COMMENT, "# Comment with some weird values like 'example', / or ! ."},
+		{token.COMMENT, "Comment"},
+		{token.COMMENT, "Comment"},
 	}
 
 	l := New(input)

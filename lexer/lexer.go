@@ -1,6 +1,9 @@
 package lexer
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/santos-404/myte/token"
 )
 
@@ -96,13 +99,17 @@ func (l *Lexer) NextToken() token.Token {
 				tok.Line = l.line
 				tok.Literal = "Comment"
 				tok.Type = token.COMMENT
-				l.readComment("block")
+				if err := l.readComment("block"); err != nil {
+					log.Fatal(err)
+				}
 			} else {  // In-line comments
 				tok.Column = l.column
 				tok.Line = l.line
 				tok.Literal = "Comment"
 				tok.Type = token.COMMENT
-				l.readComment("line")
+				if err := l.readComment("line"); err != nil {
+					log.Fatal(err)
+				}
 			}
 		case ',':
 			tok = l.newToken(token.COMMA, l.char)
@@ -244,25 +251,31 @@ func (l *Lexer) readNumber() (string, token.TokenType) {
 	return l.input[startPos:l.position], token.FLOAT
 }
 
-func (l* Lexer) readComment(commentType string) {
+func (l* Lexer) readComment(commentType string) error {
 	switch commentType {
 	case "line":
 		for l.char != '\n' {
 			l.readChar()
 		}
 	case "block":  // The structure is:  #- whatever -#
-	// TODO: If we find an EOF before the -# we should throw an error
 		for { 
 			if l.char == '-' {
 				l.readChar()
 				if l.char == '#' {
 					l.readChar()
-					return 	
+					break
 				}
+			}
+			if l.char == 0 {
+				return fmt.Errorf("The block comment is not closed. Line: %d, column: %d",
+					l.line, l.column)
 			}
 			l.readChar()
 		}
+	default:
+		return fmt.Errorf("commentType not supported. got=%s", commentType)
 	}
+	return nil
 }
 
 func isValidCharForIdent(char byte) bool {

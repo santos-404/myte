@@ -91,10 +91,19 @@ func (l *Lexer) NextToken() token.Token {
 				tok = l.newToken(token.GT, l.char)
 			}
 		case '#':
-			tok.Column = l.column
-			tok.Line = l.line
-			tok.Literal = l.readComment()
-			tok.Type = token.COMMENT
+			if l.peekNextChar() == '-' {  // Block comments
+				tok.Column = l.column
+				tok.Line = l.line
+				tok.Literal = "Comment"
+				tok.Type = token.COMMENT
+				l.readComment("block")
+			} else {  // In-line comments
+				tok.Column = l.column
+				tok.Line = l.line
+				tok.Literal = "Comment"
+				tok.Type = token.COMMENT
+				l.readComment("line")
+			}
 		case ',':
 			tok = l.newToken(token.COMMA, l.char)
 		case ';':
@@ -235,12 +244,25 @@ func (l *Lexer) readNumber() (string, token.TokenType) {
 	return l.input[startPos:l.position], token.FLOAT
 }
 
-func (l* Lexer) readComment() string {
-	startPos := l.position 
-	for l.char != '\n' {
-		l.readChar()
+func (l* Lexer) readComment(commentType string) {
+	switch commentType {
+	case "line":
+		for l.char != '\n' {
+			l.readChar()
+		}
+	case "block":  // The structure is:  #- whatever -#
+	// TODO: If we find an EOF before the -# we should throw an error
+		for { 
+			if l.char == '-' {
+				l.readChar()
+				if l.char == '#' {
+					l.readChar()
+					return 	
+				}
+			}
+			l.readChar()
+		}
 	}
-	return l.input[startPos:l.position]
 }
 
 func isValidCharForIdent(char byte) bool {

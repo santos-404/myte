@@ -190,3 +190,15 @@ func (ce *CallExpression) String() string       {
 	return out.String()
 }
 
+
+type CommentExpression struct {
+	Token token.Token  
+}
+
+func (ce *CommentExpression) expressionNode()      {}
+func (ce *CommentExpression) TokenLiteral() string { return ce.Token.Literal }
+func (ce *CommentExpression) String() string       {
+	var out bytes.Buffer
+	out.WriteString(ce.Token.Literal)
+	return out.String()
+}

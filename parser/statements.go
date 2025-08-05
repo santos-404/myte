@@ -44,7 +44,7 @@ func (p *Parser) parseVarStatement() *ast.VarStatement {
 		p.nextToken()	
 		stmt.Value = p.parseExpression(LOWEST)
 	} else {
-		stmt.Value = nil
+		stmt.Value = &ast.NilLiteral{Token: token.Token{Type: token.NIL}}
 	}
 
 	p.nextToken()  // We go to the ";" in both cases

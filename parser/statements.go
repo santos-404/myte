@@ -76,15 +76,11 @@ func (p *Parser) parseConstStatement() *ast.ConstStatement {
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	stmt := &ast.ReturnStatement{Token: p.currentToken}
 
-	// We don't do anything about ensuring the following token is whatever
-	// because I don't think it makes any sense. It might be a lot of things
 	p.nextToken()
 	
-	// TODO: Once again, we shouldn't skip everything til a semicolon is found
-	for p.currentToken.Type != token.SEMICOLON {
-		p.nextToken()
-	}
+	stmt.ReturnValue = p.parseExpression(LOWEST)
 
+	p.nextToken()
 	return stmt
 }
 

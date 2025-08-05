@@ -42,9 +42,9 @@ func (vs *VarStatement) String() string {
 
 	out.WriteString(vs.TokenLiteral() + " ")
 	out.WriteString(vs.Name.String())
-	out.WriteString(" = ")
 
 	if vs.Value != nil {
+		out.WriteString(" = ")
 		out.WriteString(vs.Value.String())
 	}
 

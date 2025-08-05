@@ -60,13 +60,16 @@ func (p *Parser) parseConstStatement() *ast.ConstStatement {
 	}
 
 	stmt.Name = &ast.Identifier{Token: p.currentToken, Value: p.currentToken.Literal}
+	p.nextToken()
 	
-	// TODO: We don't have to wait for a semicolon if the var is being 
-	// initialized. If it's just being declared, then a semicolon is ok
-	for p.currentToken.Type != token.SEMICOLON {
-		p.nextToken()
+	if p.currentToken.Type == token.ASSIGN {
+		p.nextToken()	
+		stmt.Value = p.parseExpression(LOWEST)
+	} else {
+		stmt.Value = &ast.NilLiteral{Token: token.Token{Type: token.NIL}}
 	}
 
+	p.nextToken()  // We go to the ";" in both cases
 	return stmt 
 }
 

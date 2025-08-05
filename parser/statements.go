@@ -38,13 +38,17 @@ func (p *Parser) parseVarStatement() *ast.VarStatement {
 	}
 
 	stmt.Name = &ast.Identifier{Token: p.currentToken, Value: p.currentToken.Literal}
-	
-	// TODO: We don't have to wait for a semicolon if the var is being 
-	// initialized. If it's just being declared, then a semicolon is ok
-	for p.currentToken.Type != token.SEMICOLON {
-		p.nextToken()
+	p.nextToken()	
+
+	if p.currentToken.Type == token.ASSIGN {
+		p.nextToken()	
+		stmt.Value = p.parseExpression(LOWEST)
+	} else {
+		stmt.Value = &ast.NilLiteral{Token: token.Token{Type: token.NIL}}
 	}
 
+	p.nextToken()  // We go to the ";" in both cases
+	
 	return stmt 
 }
 
@@ -56,28 +60,27 @@ func (p *Parser) parseConstStatement() *ast.ConstStatement {
 	}
 
 	stmt.Name = &ast.Identifier{Token: p.currentToken, Value: p.currentToken.Literal}
+	p.nextToken()
 	
-	// TODO: We don't have to wait for a semicolon if the var is being 
-	// initialized. If it's just being declared, then a semicolon is ok
-	for p.currentToken.Type != token.SEMICOLON {
-		p.nextToken()
+	if p.currentToken.Type == token.ASSIGN {
+		p.nextToken()	
+		stmt.Value = p.parseExpression(LOWEST)
+	} else {
+		stmt.Value = &ast.NilLiteral{Token: token.Token{Type: token.NIL}}
 	}
 
+	p.nextToken()  // We go to the ";" in both cases
 	return stmt 
 }
 
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	stmt := &ast.ReturnStatement{Token: p.currentToken}
 
-	// We don't do anything about ensuring the following token is whatever
-	// because I don't think it makes any sense. It might be a lot of things
 	p.nextToken()
 	
-	// TODO: Once again, we shouldn't skip everything til a semicolon is found
-	for p.currentToken.Type != token.SEMICOLON {
-		p.nextToken()
-	}
+	stmt.ReturnValue = p.parseExpression(LOWEST)
 
+	p.nextToken()
 	return stmt
 }
 

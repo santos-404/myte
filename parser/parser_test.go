@@ -19,37 +19,40 @@ here.
 */
 
 func TestVarStatements(t *testing.T) {
-	input := `
-var foo = 1;
-var bar = 2;
 
-var foobar = 123.45;
-`
-	l := lexer.New(input)
-	p := New(l)
-
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
-
-	if program == nil {
-		t.Fatalf("ParseProgram() returned nil")
-	}
-	if len(program.Statements) != 3 {
-		t.Fatalf("program.Statements does not contain 3 statements. got=%d",
-			len(program.Statements))
-	}
-
-	tests := []struct {
+	tests := []struct{
+		input string
 		expectedIdentifier string
+		expectedValue interface{}
 	}{
-		{"foo"},
-		{"bar"},
-		{"foobar"},
+		{"var foo = 1;", "foo", 1},
+		{"var bar = true;", "bar", true},
+		{"var theVariable = nil;", "theVariable", nil},
+		{"var foobar;", "foobar", nil},
 	}
 
-	for i, tt := range tests {
-		stmt := program.Statements[i]
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if program == nil {
+			t.Fatalf("ParseProgram() returned nil")
+		}
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements does not contain 1 statements. got=%d",
+			len(program.Statements))
+		}
+
+		stmt := program.Statements[0]
 		if !testVarStatement(t, stmt, tt.expectedIdentifier) {
+			return 
+		}
+
+		val := stmt.(*ast.VarStatement).Value
+		if !testLiteralExpression(t, val, tt.expectedValue){
 			return 
 		}
 	}
@@ -76,6 +79,71 @@ func testVarStatement(t *testing.T, statement ast.Statement, name string) bool {
 
 	if varStmt.Name.TokenLiteral() != name {
 		t.Errorf("s.Name not '%s'. got=%s", name, varStmt.Name)
+		return false
+	}
+
+	return true
+}
+
+func TestConstStatement(t *testing.T) {
+
+	tests := []struct{
+		input string
+		expectedIdentifier string
+		expectedValue interface{}
+	}{
+		{"const foo = 1;", "foo", 1},
+		{"const bar = true;", "bar", true},
+		{"const theVariable = nil;", "theVariable", nil},
+		{"const foobar;", "foobar", nil},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if program == nil {
+			t.Fatalf("ParseProgram() returned nil")
+		}
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements does not contain 1 statements. got=%d",
+			len(program.Statements))
+		}
+
+		stmt := program.Statements[0]
+		if !testConstStatement(t, stmt, tt.expectedIdentifier) {
+			return 
+		}
+
+		val := stmt.(*ast.ConstStatement).Value
+		if !testLiteralExpression(t, val, tt.expectedValue){
+			return 
+		}
+	}
+}
+
+func testConstStatement(t *testing.T, statement ast.Statement, name string) bool {
+	if statement.TokenLiteral() != "const" {
+		t.Errorf("s.TokenLiteral not 'const'. got=%T", statement)
+		return false
+	}
+
+	constStmt, ok := statement.(*ast.ConstStatement)
+	if !ok {
+ 		t.Errorf("s not *ast.ConstStatement. got=%T", statement)
+		return false
+	}
+
+	if constStmt.Name.Value != name {
+		t.Errorf("constStmt.Name.Value not %s. got=%s", name, constStmt.Name.Value)
+		return false
+	}
+
+	if constStmt.Name.TokenLiteral() != name {
+		t.Errorf("s.Name not '%s'. got=%s", name, constStmt.Name)
 		return false
 	}
 
@@ -523,23 +591,31 @@ func testBooleanLiteral(t *testing.T, exp ast.Expression, value bool) bool {
 	return true
 }
 
+func testNilLiteral(t *testing.T, exp ast.Expression, value interface{} ) bool {
+	if _, ok := exp.(*ast.NilLiteral); !ok {
+		t.Errorf("exp not *ast.Nil. got=%T", exp)
+		return false
+	}
+
+	return true
+}
 
 func testLiteralExpression(
 	t* testing.T, 
 	exp ast.Expression, 
 	expected interface{},
 ) bool {
-
 	switch v := expected.(type) {
 	case int:
 		return testIntegerLiteral(t, exp, int64(v))
 	case int64:
 		return testIntegerLiteral(t, exp, v)
 	case string:
-		fmt.Println(exp, v)
 		return testIdentifier(t, exp, v)	
 	case bool:
 		return testBooleanLiteral(t, exp, v)
+	case nil:
+		return testNilLiteral(t, exp, v) 
 	}
 
 	t.Errorf("type of exp not handled. got=%T", exp)

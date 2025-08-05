@@ -76,6 +76,9 @@ func (p *Parser) parseBooleanLiteral() ast.Expression {
 	return lit
 }
 
+func (p *Parser) parseNilLiteral() ast.Expression {
+	return &ast.NilLiteral{Token: p.currentToken}
+}
 
 func (p *Parser) parsePrefixExpression() ast.Expression {
 	exp := &ast.PrefixExpression{

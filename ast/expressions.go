@@ -53,6 +53,15 @@ func (bl *BooleanLiteral) TokenLiteral() string { return bl.Token.Literal }
 func (bl *BooleanLiteral) String() string       { return bl.Token.Literal }
 
 
+type NilLiteral struct {
+	Token token.Token
+}
+
+func (nl *NilLiteral) expressionNode()      {}
+func (nl *NilLiteral) TokenLiteral() string { return nl.Token.Literal }
+func (nl *NilLiteral) String() string       { return nl.Token.Literal }
+
+
 type PrefixExpression struct {
 	Token token.Token  // Prefix token, e.g.: ! | -
 	Operator string 

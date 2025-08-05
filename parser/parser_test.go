@@ -27,6 +27,7 @@ func TestVarStatements(t *testing.T) {
 	}{
 		{"var foo = 1;", "foo", 1},
 		{"var bar = true;", "bar", true},
+		{"var theVariable = nil;", "theVariable", nil},
 		{"var foobar;", "foobar", nil},
 	}
 
@@ -525,8 +526,12 @@ func testBooleanLiteral(t *testing.T, exp ast.Expression, value bool) bool {
 	return true
 }
 
-//TODO: Change this
 func testNilLiteral(t *testing.T, exp ast.Expression, value interface{} ) bool {
+	if _, ok := exp.(*ast.NilLiteral); !ok {
+		t.Errorf("exp not *ast.Nil. got=%T", exp)
+		return false
+	}
+
 	return true
 }
 

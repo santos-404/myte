@@ -139,17 +139,19 @@ func (p *Parser) parseIfExpression() ast.Expression {
 		var alternative *ast.IfExpression
 		p.nextToken()
 
-		if p.peekToken.Type == token.LBRACE { 
-			alternative = &ast.IfExpression{
-				Token: p.currentToken, 
-			}
-			p.nextToken()
-			alternative.Condition = &ast.BooleanLiteral{Token: token.Token{Type: token.TRUE}, Value: true}
-			alternative.Consequence = p.parseBlockStatement()
-		} else {
-			p.nextToken()
-			alternative = p.parseIfExpression().(*ast.IfExpression)
-		} 
+		switch p.peekToken.Type {
+			case token.LBRACE:
+				alternative = &ast.IfExpression{Token: p.currentToken}
+				p.nextToken()
+				alternative.Condition = &ast.BooleanLiteral{Token: token.Token{Type: token.TRUE}, Value: true}
+				alternative.Consequence = p.parseBlockStatement()
+
+			case token.IF:
+				p.nextToken()
+				alternative = p.parseIfExpression().(*ast.IfExpression)
+
+			default: return nil
+		}
 
 		exp.Alternative = alternative
 	}

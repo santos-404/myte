@@ -118,11 +118,16 @@ func (ie *IfExpression) String() string       {
 
 	out.WriteString(ie.Token.Literal)
 	out.WriteString(" ")
-	out.WriteString(ie.Condition.String())
-	out.WriteString(" ")
+
+	if ie.Token.Type == token.IF {
+		out.WriteString(ie.Condition.String())
+		out.WriteString(" ")
+	}
+
 	out.WriteString(ie.Consequence.String())
 
 	if ie.Alternative != nil {
+		out.WriteString("\n")
 		out.WriteString(ie.Alternative.String())
 	}
 

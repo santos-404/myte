@@ -105,10 +105,10 @@ func (ie *InfixExpression) String() string       {
 
 
 type IfExpression struct {
-	Token token.Token  // The IF token
+	Token token.Token  
 	Condition Expression
 	Consequence *BlockStatement
-	Alternative *BlockStatement
+	Alternative *IfExpression // The alternative is else-if/else expression. on else, condition is true
 }
 
 func (ie *IfExpression) expressionNode()      {}
@@ -123,7 +123,6 @@ func (ie *IfExpression) String() string       {
 	out.WriteString(ie.Consequence.String())
 
 	if ie.Alternative != nil {
-		out.WriteString("else")
 		out.WriteString(ie.Alternative.String())
 	}
 

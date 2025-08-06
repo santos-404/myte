@@ -788,14 +788,14 @@ func TestIfElseExpression(t *testing.T) {
 		return 
 	}
 
-	if len(exp.Alternative.Statements) != 1 {
-		t.Errorf("alternateive is not 1 statements. got=%d", len(exp.Consequence.Statements))
+	if len(exp.Alternative.Consequence.Statements) != 1 {
+		t.Errorf("alternative is not 1 statements. got=%d", len(exp.Alternative.Consequence.Statements))
 	}
 
-	alternative, ok := exp.Alternative.Statements[0].(*ast.ExpressionStatement)
+	alternative, ok := exp.Alternative.Consequence.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
 		t.Fatalf("Alternative.Statments[0] is not an ast.ExpressionStatement. got=%T",
-			exp.Alternative.Statements[0])
+			exp.Alternative.Consequence.Statements[0])
 	}
 
 	if !testIdentifier(t, alternative.Expression, "y") {

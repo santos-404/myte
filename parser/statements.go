@@ -85,6 +85,9 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 }
 
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+	/*
+	The block statement starts with a '{' Token.
+	*/
 	block := &ast.BlockStatement{Token: p.currentToken}
 	block.Statements = []ast.Statement{}
 

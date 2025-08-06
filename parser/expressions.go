@@ -126,7 +126,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	exp.Condition = p.parseExpression(LOWEST)
 
 	if !p.peekCompareThenAdvance(token.LBRACE) {
-		return nil  // TODO: errrrrrrrrrrrr
+		return nil  
 	}
 
 	exp.Consequence = p.parseBlockStatement()
@@ -136,16 +136,20 @@ func (p *Parser) parseIfExpression() ast.Expression {
 		2. We are before an else. So the new "if" expression got true as condition
 	*/
 	if p.peekToken.Type == token.ELSE { 
+		var alternative *ast.IfExpression
 		p.nextToken()
-		alternative := &ast.IfExpression{
-			Token: p.currentToken, 
-			Condition: &ast.BooleanLiteral{Token: token.Token{Type: token.TRUE}, Value: true},	
-		}
 
-		if !p.peekCompareThenAdvance(token.LBRACE) {
-			return nil
-		}
-		alternative.Consequence = p.parseBlockStatement()
+		if p.peekToken.Type == token.LBRACE { 
+			alternative = &ast.IfExpression{
+				Token: p.currentToken, 
+			}
+			p.nextToken()
+			alternative.Condition = &ast.BooleanLiteral{Token: token.Token{Type: token.TRUE}, Value: true}
+			alternative.Consequence = p.parseBlockStatement()
+		} else {
+			p.nextToken()
+			alternative = p.parseIfExpression().(*ast.IfExpression)
+		} 
 
 		exp.Alternative = alternative
 	}

@@ -6,7 +6,7 @@ import (
 	"io"
 
 	"github.com/santos-404/myte/lexer"
-	"github.com/santos-404/myte/token"
+	"github.com/santos-404/myte/parser"
 )
 
 
@@ -24,9 +24,20 @@ func Start(in io.Reader, out io.Writer) {
 
 		line := scanner.Text()
 		l := lexer.New(line)
-		
-		for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
-			fmt.Printf("%+v\n", tok)
+		p := parser.New(l)
+
+		program := p.ParseProgram()
+		if len(p.Errors()) != 0 {
+			printParserErrors(out, p.Errors())
 		}
+		
+		io.WriteString(out, program.String())
+		io.WriteString(out, "\n")
+	}
+}
+
+func printParserErrors(out io.Writer, errors []string) {
+	for _, err := range errors {
+		io.WriteString(out, "\t"+err+"\n")
 	}
 }

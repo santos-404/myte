@@ -117,6 +117,7 @@ func (ie *IfExpression) String() string       {
 	var out bytes.Buffer
 
 	out.WriteString(ie.Token.Literal)
+	out.WriteString(" ")
 	out.WriteString(ie.Condition.String())
 	out.WriteString(" ")
 	out.WriteString(ie.Consequence.String())
